@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+@theme {
+  --color-skin-base: var(--color-bg-base);
+  --color-skin-card: var(--color-bg-card);
+  --color-skin-overlay: var(--color-bg-overlay);
+  --color-skin-border: var(--color-border);
+  --color-skin-text: var(--color-text-base);
+  --color-skin-muted: var(--color-text-muted);
+  --color-skin-primary: var(--color-primary);
+  --color-skin-primary-hover: var(--color-primary-hover);
+  --color-skin-control-bg: var(--color-control-bg);
+  --color-skin-control-hover: var(--color-control-hover);
+  --color-skin-control-text: var(--color-control-text);
+  --font-sans: 'Vazirmatn', sans-serif;
+}
+
+@layer base {
+  :root {
+    --color-bg-base: #f8fafc;
+    --color-bg-card: #ffffff;
+    --color-bg-overlay: rgba(248, 250, 252, 0.85);
+    --color-border: #e2e8f0;
+    --color-text-base: #0f172a;
+    --color-text-muted: #64748b;
+    --color-primary: #b61615;
+    --color-primary-hover: #991211;
+    --color-control-bg: #f1f5f9;
+    --color-control-hover: #e2e8f0;
+    --color-control-text: #334155;
+  }
+
+  [data-theme="dark"] {
+    --color-bg-base: #020617;
+    --color-bg-card: #0f172a;
+    --color-bg-overlay: rgba(2, 6, 23, 0.85);
+    --color-border: #1e293b;
+    --color-text-base: #f8fafc;
+    --color-text-muted: #cbd5e1;
+    --color-primary: #e11d48;
+    --color-primary-hover: #f43f5e;
+    --color-control-bg: #1e293b;
+    --color-control-hover: #334155;
+    --color-control-text: #e2e8f0;
+  }
+
+  [data-theme="reading"] {
+    --color-bg-base: #fdf6e3;
+    --color-bg-card: #fffbf0;
+    --color-bg-overlay: rgba(253, 246, 227, 0.9);
+    --color-border: #eaddc5;
+    --color-text-base: #433422;
+    --color-text-muted: #8a7a66;
+    --color-primary: #b57614;
+    --color-primary-hover: #8f590b;
+    --color-control-bg: #f0e4ce;
+    --color-control-hover: #eaddc5;
+    --color-control-text: #5c4b35;
+  }
+
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-base);
+    transition: background-color 0.4s ease, color 0.4s ease;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-primary);
+    color: #ffffff;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+  .stf__wrapper { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+  .perspective-1000 { perspective: 1000px; }
+  .transform-style-3d { transform-style: preserve-3d; }
+}
+
+@layer utilities {
+  /* Fix 1.6: scrollbar-hide utility */
+  .scrollbar-hide { scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* BUG-N05: Safe area inset for notches */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .glass-effect {
+    background: var(--color-bg-overlay);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Fix 2.11: Shimmer skeleton animation */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(90deg,
+      var(--color-control-bg) 25%,
+      var(--color-control-hover) 50%,
+      var(--color-control-bg) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Scroll progress bar */
+  @keyframes scroll-progress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+
+  /* Catalog card hover shimmer */
+  @keyframes cardShimmer {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .card-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: cardShimmer 1s ease-in-out;
+  }
+
+  /* Pulsing ring for video play button */
+  @keyframes pulseRing {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .pulse-ring {
+    animation: pulseRing 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+}

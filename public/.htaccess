@@ -1,0 +1,46 @@
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the "ea-php84" package as the default "PHP" programming language.
+AddHandler application/x-httpd-ea-php84 .php .php8 .phtml
+# php -- END cPanel-generated handler, do not edit
+
+# Security: Block direct access to text and JSON files (prevent data leak)
+<FilesMatch "\.(txt|json)$">
+  Require all denied
+  Order deny,allow
+  Deny from all
+</FilesMatch>
+
+<Files "admin-credentials-manager.php">
+  Require all denied
+  Order deny,allow
+  Deny from all
+</Files>
+
+# Fix 4.9 + TECH-01: Content-Security-Policy and additional security headers
+Header always set Content-Security-Policy "default-src 'self'; \
+  script-src 'self' 'unsafe-inline'; \
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \
+  font-src 'self' https://fonts.gstatic.com; \
+  img-src 'self' data: blob: https://patient.nafaspharmed.com https://nafaspharmed.com https://dbsgraphic.ir https://placehold.co; \
+  media-src 'self' https://nafaspharmed.com; \
+  connect-src 'self' https://patient.nafaspharmed.com https://nafaspharmed.com; \
+  frame-ancestors 'none'; \
+  base-uri 'self'; \
+  form-action 'self';"
+
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+# SPA Routing: serve the built index.html for all non-file routes
+DirectoryIndex index.html
+RewriteEngine On
+RewriteBase /
+
+# Don't rewrite if it's a real file (like images, css, js)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Send all other routes to index.html (client-side router handles the rest)
+RewriteRule ^(.*)$ index.html [QSA,L]
