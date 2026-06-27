@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   X, Send, ArrowRight, MessageCircle, Building2,
   ThumbsUp, ThumbsDown, Loader2, Star, RefreshCw,
@@ -315,41 +316,73 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] md:inset-auto md:bottom-6 md:left-6 p-4 md:p-0 flex items-end justify-center md:items-stretch md:justify-start" dir="rtl">
-      {/* Mobile backdrop */}
-      <div className="md:hidden absolute inset-0 bg-black/40" onClick={handleClose} />
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[60] md:inset-auto md:bottom-6 md:right-6 p-4 md:p-0 flex items-end justify-center md:items-stretch md:justify-start" dir="rtl">
+        {/* Mobile backdrop */}
+        <motion.div
+          className="md:hidden absolute inset-0 bg-black/40"
+          onClick={handleClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        />
 
-      <div ref={containerRef} className="relative w-full md:w-[380px] h-[80vh] md:h-[600px] max-h-[680px] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden mb-4 md:mb-0">
+        <motion.div
+          ref={containerRef}
+          className="relative w-full md:w-[380px] h-[80vh] md:h-[600px] max-h-[680px] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden mb-4 md:mb-0"
+          initial={{ scale: 0.8, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.8, opacity: 0, y: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        >
         {/* Header */}
-        <div className="shrink-0 bg-skin-primary text-white px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="shrink-0 bg-gradient-to-b from-skin-primary to-skin-primary/95 text-white px-4 py-3.5 flex items-center justify-between border-b border-skin-primary/20 shadow-sm">
+          <div className="flex items-center gap-2.5">
             {view !== 'chat' && (
-              <button onClick={() => setView('chat')} className="p-1 hover:bg-white/15 rounded-lg transition-colors" aria-label="بازگشت">
+              <motion.button
+                onClick={() => setView('chat')}
+                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                aria-label="بازگشت"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <ArrowRight size={18} />
-              </button>
+              </motion.button>
             )}
-            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+            <motion.div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center" animate={{ opacity: [1, 0.7, 1] }} transition={{ duration: 3, repeat: Infinity }}>
               <MessageCircle size={18} />
-            </div>
+            </motion.div>
             <div className="leading-tight">
               <p className="font-bold text-sm">دستیار هوشمند نفس</p>
               <p className="text-[11px] text-white/80 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" /> آنلاین
+                <motion.span className="w-1.5 h-1.5 rounded-full bg-emerald-300" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} /> آنلاین
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={resetChat} className="p-1 hover:bg-white/15 rounded-lg transition-colors" aria-label="شروع مجدد">
+            <motion.button
+              onClick={resetChat}
+              className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+              aria-label="شروع مجدد"
+              whileHover={{ scale: 1.05, rotate: 90 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <RefreshCw size={18} />
-            </button>
-            <button onClick={handleClose} className="p-1 hover:bg-white/15 rounded-lg transition-colors" aria-label="بستن">
+            </motion.button>
+            <motion.button
+              onClick={handleClose}
+              className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+              aria-label="بستن"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <X size={18} />
-            </button>
+            </motion.button>
           </div>
         </div>
 
         {/* Body */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 bg-skin-base">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-skin-base to-skin-card/50 space-y-0.5">
           {view === 'chat' ? (
             <ChatView
               messages={messages}
@@ -375,29 +408,57 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
 
         {/* Composer (chat only) */}
         {view === 'chat' && (
-          <div className="shrink-0 border-t border-skin-border p-2 bg-skin-card">
+          <div className="shrink-0 border-t border-skin-border p-3 bg-gradient-to-b from-skin-card to-skin-base/50">
             <form
               onSubmit={(e) => { e.preventDefault(); send(input); }}
-              className="flex items-end gap-2"
+              className="flex items-end gap-2.5"
             >
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
-                rows={1}
-                placeholder="پیامتان را بنویسید…"
-                className="flex-1 resize-none max-h-24 px-3 py-2 text-sm bg-skin-control-bg border border-skin-border rounded-xl outline-none focus:border-skin-primary"
-              />
+              {/* Animated border container */}
+              <div className="flex-1 relative group">
+                {/* Glowing background gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-skin-primary/0 via-skin-primary/10 to-skin-primary/0 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none blur-sm" />
+
+                {/* Animated border effect */}
+                <div className="absolute inset-0 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none" style={{
+                  background: 'linear-gradient(45deg, var(--color-primary), var(--color-primary), transparent)',
+                  backgroundSize: '200% 200%',
+                  animation: 'none'
+                }} />
+
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
+                  rows={1}
+                  placeholder="پیامتان را بنویسید…"
+                  className="relative flex-1 resize-none max-h-24 px-3 py-2.5 text-sm bg-skin-control-bg border-2 border-skin-border rounded-xl outline-none focus:border-skin-primary focus:shadow-[0_0_12px_rgba(182,22,21,0.15)] transition-all duration-300"
+                />
+              </div>
+
               {SpeechCtor && (
-                <button type="button" onClick={toggleMic} aria-label="گفتن با صدا" className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors ${listening ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-skin-control-bg text-skin-muted hover:text-skin-primary'}`}>
+                <motion.button
+                  type="button"
+                  onClick={toggleMic}
+                  aria-label="گفتن با صدا"
+                  className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors ${listening ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-skin-control-bg text-skin-muted hover:text-skin-primary hover:bg-skin-control-hover'}`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Mic size={18} />
-                </button>
+                </motion.button>
               )}
-              <button type="submit" disabled={loading || !input.trim()} className="w-10 h-10 shrink-0 rounded-xl bg-skin-primary hover:bg-skin-primary-hover text-white flex items-center justify-center disabled:opacity-50 transition-colors">
+
+              <motion.button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className="w-10 h-10 shrink-0 rounded-xl bg-skin-primary hover:bg-skin-primary-hover text-white flex items-center justify-center disabled:opacity-50 transition-colors shadow-sm"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-              </button>
+              </motion.button>
             </form>
-            <div className="flex items-center justify-between mt-1.5 px-1 opacity-50 hover:opacity-100 transition-opacity">
+            <div className="flex items-center justify-between mt-2 px-1 opacity-50 hover:opacity-100 transition-opacity">
                <span className="text-[9px] text-skin-muted">هوش مصنوعی ممکن است اشتباه کند.</span>
                <div className="flex items-center gap-1.5 shrink-0" dir="ltr">
                  <span className="text-[9px] text-skin-muted font-sans tracking-tight">Developed by Saeed & Claude</span>
@@ -410,21 +471,35 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
         )}
 
         {/* Bottom nav */}
-        {(
-          <div className="shrink-0 grid grid-cols-3 border-t border-skin-border bg-skin-card text-[11px]">
-            <button onClick={() => setView('chat')} className={`flex flex-col items-center gap-0.5 py-2 transition-colors ${view === 'chat' ? 'text-skin-primary' : 'text-skin-muted hover:text-skin-primary'}`}>
-              <Home size={16} /> گفتگو
-            </button>
-            <button onClick={() => setView('about')} className={`flex flex-col items-center gap-0.5 py-2 transition-colors ${view === 'about' ? 'text-skin-primary' : 'text-skin-muted hover:text-skin-primary'}`}>
-              <Info size={16} /> دربارهٔ نفس
-            </button>
-            <button onClick={() => setView('contact')} className={`flex flex-col items-center gap-0.5 py-2 transition-colors ${view === 'contact' ? 'text-skin-primary' : 'text-skin-muted hover:text-skin-primary'}`}>
-              <Phone size={16} /> تماس با نفس
-            </button>
-          </div>
-        )}
+        <div className="shrink-0 grid grid-cols-3 border-t border-skin-border bg-gradient-to-t from-skin-base/30 to-skin-card text-[11px] font-medium">
+          <motion.button
+            onClick={() => setView('chat')}
+            className={`flex flex-col items-center gap-1 py-2.5 transition-all ${view === 'chat' ? 'text-skin-primary' : 'text-skin-muted hover:text-skin-primary'}`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Home size={16} /> گفتگو
+          </motion.button>
+          <motion.button
+            onClick={() => setView('about')}
+            className={`flex flex-col items-center gap-1 py-2.5 transition-all ${view === 'about' ? 'text-skin-primary' : 'text-skin-muted hover:text-skin-primary'}`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Info size={16} /> دربارهٔ نفس
+          </motion.button>
+          <motion.button
+            onClick={() => setView('contact')}
+            className={`flex flex-col items-center gap-1 py-2.5 transition-all ${view === 'contact' ? 'text-skin-primary' : 'text-skin-muted hover:text-skin-primary'}`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Phone size={16} /> تماس با نفس
+          </motion.button>
+        </div>
+      </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 };
 
