@@ -124,7 +124,7 @@ const StatsBar: React.FC<{ catalogCount: number; videoCount: number }> = ({ cata
 
   return (
     <div ref={ref} className="bg-skin-card border-y border-skin-border mb-8">
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 py-3 flex items-center justify-center gap-6 md:gap-10 flex-wrap">
+      <div className="mx-auto lg:w-[90%] lg:max-w-[1800px] px-3 sm:px-4 py-3 flex items-center justify-center gap-6 md:gap-10 flex-wrap">
         <div className="flex items-center gap-2 text-skin-muted text-sm">
           <BookOpen size={15} className="text-skin-primary" />
           <span className="font-bold text-skin-text tabular-nums">{catCount}</span>
@@ -293,7 +293,7 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
     <footer className="bg-skin-card border-t border-skin-border mt-16">
       {/* Gradient top line */}
       <div className="h-px w-full" style={{ background: 'linear-gradient(to right, transparent, var(--color-primary) 30%, var(--color-primary) 70%, transparent)' }} />
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 py-10">
+      <div className="mx-auto lg:w-[90%] lg:max-w-[1800px] px-3 sm:px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           {/* Logo + company */}
           <div className="flex flex-col items-center md:items-start gap-3">
@@ -370,9 +370,8 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
           <p className="text-xs text-skin-muted order-2 md:order-1">© {new Date().getFullYear()} نفس زیست فارمد. تمامی حقوق محفوظ است.</p>
           
           <a href={DBS_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] text-skin-muted md:opacity-75 hover:opacity-100 transition-opacity group order-1 md:order-2" dir="ltr">
-            <span className="font-bold tracking-wide">DBS Graphic</span>
+            <span className="font-sans tracking-wide">Developed by DBS &amp; Claude</span>
             <img src={DBS_LOGO_URL} alt="DBS Graphic" className="h-3.5 w-auto object-contain" />
-            <span className="font-sans">طراحی شده توسط</span>
           </a>
         </div>
 
@@ -822,7 +821,7 @@ const InnerApp: React.FC = () => {
             : 'bg-skin-base/95 backdrop-blur-sm'
         }`}
       >
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 h-16 flex items-center gap-3">
+        <div className="mx-auto lg:w-[90%] lg:max-w-[1800px] px-3 sm:px-4 h-16 flex items-center gap-3">
           {/* Logo */}
           <button
             onClick={() => setLogoClicks(c => c + 1)}
@@ -903,7 +902,7 @@ const InnerApp: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="max-w-[1600px] mx-auto px-3 sm:px-4 mt-3"
+            className="mx-auto lg:w-[90%] lg:max-w-[1800px] px-3 sm:px-4 mt-3"
           >
             <div className="flex items-center justify-between gap-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 rounded-xl px-4 py-3 text-sm">
               <p>کاتالوگ مورد نظر یافت نشد. می‌توانید با جستجو آن را پیدا کنید.</p>
@@ -914,7 +913,7 @@ const InnerApp: React.FC = () => {
       </AnimatePresence>
 
       {/* ─── MAIN CONTENT ─────────────────────────────────────────────────── */}
-      <main className="max-w-[1600px] mx-auto px-3 sm:px-4 py-6">
+      <main className="mx-auto lg:w-[90%] lg:max-w-[1800px] px-3 sm:px-4 py-6">
         {/* BUG-N02: Real loading state and error display */}
         {error && !isLoading && (
           <div className="mb-4">

@@ -10,4 +10,4 @@ export const DBS_URL = 'https://dbsgraphic.ir';
 export const COMPANY_SLOGAN = 'مراقب شما در هر نفس';
 
 // App version — bumped as we ship rounds of work on the portal.
-export const APP_VERSION = '1.2.0';
+export const APP_VERSION = '1.5';

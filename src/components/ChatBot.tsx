@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { WP_AJAX_URL } from '../config';
 import { PRODUCTS } from '../constants/products';
-import { DBS_URL, DBS_LOGO_URL } from '../constants/brand';
 
 interface ChatBotProps {
   open: boolean;
@@ -438,12 +437,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
             </form>
             <div className="flex items-center justify-between mt-1.5 px-1 opacity-50 hover:opacity-100 transition-opacity">
                <span className="text-[9px] text-skin-muted">هوش مصنوعی ممکن است اشتباه کند.</span>
-               <div className="flex items-center gap-1.5 shrink-0" dir="ltr">
-                 <span className="text-[9px] text-skin-muted font-sans tracking-tight">Developed by Saeed & Claude</span>
-                 <a href={DBS_URL} target="_blank" rel="noopener noreferrer">
-                   <img src={DBS_LOGO_URL} alt="DBS Graphic" className="h-2.5 opacity-60 hover:opacity-100 transition-opacity" />
-                 </a>
-               </div>
+               <span className="text-[9px] text-skin-muted font-sans tracking-tight shrink-0" dir="ltr">Developed by DBS &amp; Claude</span>
             </div>
           </div>
         )}
