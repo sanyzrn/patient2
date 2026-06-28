@@ -713,14 +713,14 @@ const InnerApp: React.FC = () => {
     return favorites.map(id => catalogs.find(c => c.id === id)).filter((c): c is Catalog => !!c);
   }, [favorites, catalogs]);
 
-  const filteredVideos = (() => {
+  const filteredVideos = useMemo(() => {
     const query = videoSearch.trim().toLowerCase();
     if (!query) return videos;
     return videos.filter(v =>
       v.title.toLowerCase().includes(query) ||
       v.description.toLowerCase().includes(query)
     );
-  })();
+  }, [videos, videoSearch]);
 
   const showFavoritesRow = favoriteCatalogs.length > 0 && !searchTerm && !selectedCategory;
 
@@ -742,7 +742,7 @@ const InnerApp: React.FC = () => {
   }, []);
 
   // Build command palette commands
-  const paletteCommands: PaletteCommand[] = [
+  const paletteCommands: PaletteCommand[] = useMemo(() => [
     // Theme commands
     { id: 'theme-light', label: 'پوسته روشن', group: 'تم', action: () => setTheme('light'), keywords: ['روشن', 'light'] },
     { id: 'theme-dark', label: 'پوسته تاریک', group: 'تم', action: () => setTheme('dark'), keywords: ['تاریک', 'dark'] },
@@ -768,7 +768,7 @@ const InnerApp: React.FC = () => {
       action: () => { handleOpenCatalog(cat); setShowCommandPalette(false); },
       keywords: [cat.title, cat.category],
     })),
-  ];
+  ], [catalogs, handleOpenCatalog, clearRecent, clearFavorites, setTheme, setViewMode, setShowCommandPalette]);
 
   // -- Admin views --
   if (viewMode === 'admin-login') {

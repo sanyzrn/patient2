@@ -86,6 +86,12 @@ const MarkdownText: React.FC<{ text: string }> = ({ text }) => (
 const Typewriter: React.FC<{ text: string; onDone: () => void }> = ({ text, onDone }) => {
   const [shown, setShown] = useState('');
   useEffect(() => {
+    // Respect reduced-motion: show the full text immediately, no per-char churn.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setShown(text);
+      onDone();
+      return;
+    }
     let i = 0;
     const id = setInterval(() => {
       i += 3;

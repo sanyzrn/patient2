@@ -2,42 +2,29 @@ import { useState, useEffect } from 'react';
 
 /**
  * SURPRISE-09: Offline-First Cache Progress Indicator
- * Detects which catalogs are cached for offline access
+ * Reports whether a single catalog is cached for offline access.
+ *
+ * Takes a primitive `catalogId` (stable across renders) so the effect does not
+ * re-run — and re-open Cache Storage — on every render.
  */
-export function useCachedCatalogs(catalogIds: string[]): Set<string> {
-  const [cachedIds, setCachedIds] = useState<Set<string>>(new Set());
+export function useCachedCatalogs(catalogId: string): boolean {
+  const [isCached, setIsCached] = useState(false);
 
   useEffect(() => {
-    if (!('caches' in window)) {
-      return;
-    }
-
-    const checkCached = async () => {
+    if (!('caches' in window)) return;
+    let cancelled = false;
+    (async () => {
       try {
         const cache = await caches.open('assets-cache');
         const keys = await cache.keys();
-        const keySet = new Set(keys.map(k => k.url));
-        
-        // Check which catalogs are in the cache
-        const cached = new Set<string>();
-        for (const id of catalogIds) {
-          // Check if any cache URL contains this catalog ID
-          for (const url of keySet) {
-            if (url.includes(id)) {
-              cached.add(id);
-              break;
-            }
-          }
-        }
-        
-        setCachedIds(cached);
-      } catch (err) {
-        console.debug('Cache check error:', err);
+        const found = keys.some(k => k.url.includes(catalogId));
+        if (!cancelled) setIsCached(found);
+      } catch {
+        /* ignore */
       }
-    };
+    })();
+    return () => { cancelled = true; };
+  }, [catalogId]);
 
-    checkCached();
-  }, [catalogIds]);
-
-  return cachedIds;
+  return isCached;
 }

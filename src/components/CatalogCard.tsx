@@ -260,8 +260,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
   // UX-09: Load saved reading progress
   const [savedPage, setSavedPage] = useState<number | null>(null);
   // SURPRISE-09: Check if this catalog is cached
-  const cachedIds = useCachedCatalogs([catalog.id]);
-  const isCached = cachedIds.has(catalog.id);
+  const isCached = useCachedCatalogs(catalog.id);
 
   useEffect(() => {
     const t = setTimeout(() => setShimmerActive(true), 100);
@@ -583,4 +582,4 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
   );
 };
 
-export default CatalogCard;
+export default React.memo(CatalogCard);
