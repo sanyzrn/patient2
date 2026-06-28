@@ -151,4 +151,32 @@
   .pulse-ring {
     animation: pulseRing 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   }
+
+  /* ChatBot composer: minimal moving gradient/glow border around the input.
+     A thin animated gradient ring (visible via the wrapper's padding) that
+     gently sweeps, then brightens + glows when the field is focused. */
+  @keyframes aiBorderFlow {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  .ai-input-border {
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-primary) 25%,
+      transparent 50%,
+      var(--color-primary) 75%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: aiBorderFlow 4s linear infinite;
+    opacity: 0.35;
+    transition: opacity 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .ai-input-border:focus-within {
+    opacity: 1;
+    box-shadow: 0 0 14px -2px var(--color-primary);
+  }
 }
