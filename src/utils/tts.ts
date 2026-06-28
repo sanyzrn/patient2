@@ -52,26 +52,3 @@ export function stopSpeaking(): void {
     window.speechSynthesis.cancel();
   }
 }
-
-/**
- * Checks if speech synthesis is currently speaking
- */
-export function isSpeaking(): boolean {
-  return window.speechSynthesis?.speaking ?? false;
-}
-
-/**
- * Gets available voices
- */
-export function getAvailableVoices(): SpeechSynthesisVoice[] {
-  return window.speechSynthesis?.getVoices() ?? [];
-}
-
-/**
- * Finds a Persian voice
- */
-export function getPersianVoice(): SpeechSynthesisVoice | undefined {
-  const voices = getAvailableVoices();
-  return voices.find(v => v.lang.startsWith('fa')) || 
-         voices.find(v => v.lang === 'fa-IR');
-}

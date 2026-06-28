@@ -15,7 +15,7 @@ interface ProductsSectionProps {
 const PRODUCT_ICONS: Record<string, LucideIcon> = {
   tiotoriva: Wind,
   coldanese: ThermometerSnowflake,
-  megzolek: Baby,
+  meglozek: Baby,
   folinozit: Flower2,
   capsulizer: Stethoscope,
 };

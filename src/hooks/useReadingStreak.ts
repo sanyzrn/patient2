@@ -80,8 +80,8 @@ export function checkStreakMilestone(streak: StreakData): string | null {
   if (milestones.includes(streak.currentStreak)) {
     if (streak.currentStreak === 3) return '🔥 ۳ روز متوالی! دارید عادت می‌کنید!';
     if (streak.currentStreak === 7) return '🔥 ۷ روز متوالی! هفته داشتی!';
-    if (streak.currentStreak === 14) return '🔥۱۴ روز متوالی! نمونه ایده‌ال هستید!';
-    if (streak.currentStreak === 30) return '🔥 ۱ ماه! شما یک پرستار درآمدی هستید!';
+    if (streak.currentStreak === 14) return '🔥 ۱۴ روز متوالی! نمونه ایده‌آل هستید!';
+    if (streak.currentStreak === 30) return '🔥 ۱ ماه متوالی! فوق‌العاده‌اید!';
     if (streak.currentStreak === 60) return '🔥 ۶۰ روز! نیروی ابرقهرمان!';
     if (streak.currentStreak === 100) return '🔥 ۱۰۰ روز! افسانه‌ای!';
   }

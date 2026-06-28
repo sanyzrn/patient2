@@ -28,12 +28,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBack }) => {
     setError('');
     setIsLoading(true);
     try {
-      if (pwd === 'Saeed@79170%') {
-         sessionStorage.setItem('admin_token', 'local-dev-token');
-         onLogin();
-         return;
-      }
-      
       const res = await fetch(import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL}/api.php` : './api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Admin-Password': pwd },
@@ -48,12 +42,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBack }) => {
         setError('رمز عبور اشتباه است');
       }
     } catch (err) {
-      if (pwd === 'Saeed@79170%') {
-         sessionStorage.setItem('admin_token', 'local-dev-token');
-         onLogin();
-      } else {
-         setError('رمز عبور اشتباه است یا خطا در اتصال به سرور');
-      }
+      setError('رمز عبور اشتباه است یا خطا در اتصال به سرور');
       console.error('Auth error:', err);
     } finally {
       setIsLoading(false);

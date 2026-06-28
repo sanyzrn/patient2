@@ -9,6 +9,8 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
+// Admin/content JSON must never be cached by intermediaries.
+header('Cache-Control: no-store, max-age=0');
 
 // CORS: restrict to ALLOWED_ORIGINS env var (comma-separated). Never use "*".
 $allowed_origins = array_filter(array_map('trim', explode(',', getenv('ALLOWED_ORIGINS') ?: 'http://localhost:5173,http://localhost:3000')));
@@ -22,15 +24,16 @@ header('Access-Control-Allow-Headers: Content-Type, X-Admin-Password, X-Admin-To
 header('Access-Control-Max-Age: 3600');
 
 require_once __DIR__ . '/rate_limit.php';
-// General abuse cap per IP (admin API is low-volume by nature).
-nafas_check_rate_limit(300);
 
 const TOKEN_TTL_SECONDS = 86400;
 
-$credentials_file = __DIR__ . '/.admin-credentials.json';
-$token_file = __DIR__ . '/.admin-tokens.json';
-$content_dir = __DIR__ . '/data';
-$content_file = __DIR__ . '/data/content.json';
+// Secret/content state lives OUTSIDE the web root.
+$storage_dir = getenv('NAFAS_STORAGE_DIR') ?: (__DIR__ . '/../storage');
+if (!is_dir($storage_dir)) { mkdir($storage_dir, 0700, true); }
+$credentials_file = $storage_dir . '/.admin-credentials.json';
+$token_file = $storage_dir . '/.admin-tokens.json';
+$content_dir = $storage_dir . '/data';
+$content_file = $storage_dir . '/data/content.json';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -51,6 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     exit(json_encode(['error' => 'Method not allowed', 'valid' => false]));
 }
+
+// Throttle POST actions only (login/save/change_password); never the public GET.
+nafas_check_rate_limit(300);
 
 $request_body = json_decode(file_get_contents('php://input'), true);
 if (!is_array($request_body)) {
@@ -77,11 +83,17 @@ exit(json_encode(['error' => 'Unknown action', 'valid' => false]));
 
 function ensure_credentials(string $credentials_file): array {
     if (!file_exists($credentials_file)) {
-        // Initial admin password (bcrypt hash — plaintext is never stored in source).
+        // Never auto-create a known-password account. The initial admin password
+        // hash must be provided by the operator via an environment variable.
+        $provided_hash = getenv('NAFAS_ADMIN_PASSWORD_HASH') ?: '';
+        if ($provided_hash === '') {
+            http_response_code(503);
+            exit(json_encode(['error' => 'Admin not configured', 'valid' => false]));
+        }
         $default_credentials = [
-            'password' => '$2y$10$PADjoIOS3UWVPVmv85GwZOA6nPYYYYdLhd9qUJIfDviBm9Smka4r.',
+            'password'   => $provided_hash,
             'created_at' => date('Y-m-d H:i:s'),
-            'note' => 'Change this password from the admin panel (Settings) when convenient.'
+            'note'       => 'Initialized from NAFAS_ADMIN_PASSWORD_HASH.'
         ];
         file_put_contents($credentials_file, json_encode($default_credentials, JSON_PRETTY_PRINT));
         chmod($credentials_file, 0600);
@@ -196,10 +208,26 @@ function save_data(array $request_body, string $token_file, string $content_dir,
         exit(json_encode(['success' => false, 'error' => 'Invalid data payload']));
     }
 
+    // Only http(s)/data URLs are allowed; reject javascript: and other schemes.
+    $is_safe_url = function ($u): bool {
+        if (!is_string($u) || $u === '') return true; // empty/optional allowed
+        return (bool) preg_match('#^(https?:|data:)#i', $u);
+    };
+
     foreach ($catalogs as $catalog) {
         if (!is_array($catalog) || empty($catalog['id']) || empty($catalog['title']) || !isset($catalog['pages']) || !is_array($catalog['pages'])) {
             http_response_code(400);
             exit(json_encode(['success' => false, 'error' => 'Invalid catalog payload']));
+        }
+        if (!$is_safe_url($catalog['coverImage'] ?? '') || !$is_safe_url($catalog['pdfUrl'] ?? '')) {
+            http_response_code(400);
+            exit(json_encode(['success' => false, 'error' => 'Unsafe URL in catalog']));
+        }
+        foreach (($catalog['pages'] ?? []) as $p) {
+            if (!$is_safe_url($p)) {
+                http_response_code(400);
+                exit(json_encode(['success' => false, 'error' => 'Unsafe page URL']));
+            }
         }
     }
 
@@ -253,8 +281,9 @@ function is_valid_token(string $submitted_token, string $token_file): bool {
         return false;
     }
 
+    // Validation must not write to disk on every request; pruning is persisted
+    // in login()/change_password() where tokens are created/replaced.
     $tokens = prune_tokens(load_tokens($token_file));
-    write_tokens($token_file, $tokens);
 
     foreach (array_keys($tokens) as $stored_token) {
         if (hash_equals($stored_token, $submitted_token)) {

@@ -40,3 +40,6 @@ public/.form-submissions.json
 public/.admin-tokens.json
 public/.admin-credentials.json
 public/data/
+
+# Secret/content state now lives outside the web root
+storage/

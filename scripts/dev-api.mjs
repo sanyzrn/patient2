@@ -16,11 +16,12 @@ import { fileURLToPath } from 'node:url';
 import bcrypt from 'bcryptjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = join(__dirname, '..', 'public');
 
-const CREDENTIALS_FILE = join(PUBLIC_DIR, '.admin-credentials.json');
-const TOKENS_FILE = join(PUBLIC_DIR, '.admin-tokens.json');
-const CONTENT_FILE = join(PUBLIC_DIR, 'data', 'content.json');
+// Secret/content state lives outside the web root (mirrors the PHP backend).
+const STORAGE_DIR = join(__dirname, '..', 'storage');
+const CREDENTIALS_FILE = join(STORAGE_DIR, '.admin-credentials.json');
+const TOKENS_FILE = join(STORAGE_DIR, '.admin-tokens.json');
+const CONTENT_FILE = join(STORAGE_DIR, 'data', 'content.json');
 
 const PORT = parseInt(process.env.DEV_API_PORT || '3001', 10);
 const TOKEN_TTL_SECONDS = 86400; // 24 hours
@@ -72,7 +73,8 @@ function writeJson(path, data) {
 }
 
 // ─── Credentials ──────────────────────────────────────────────────────────────
-const DEFAULT_PASSWORD_HASH = bcrypt.hashSync('Saeed@79170%', 12);
+const DEV_PASSWORD = process.env.DEV_ADMIN_PASSWORD || 'changeme-dev-only';
+const DEFAULT_PASSWORD_HASH = bcrypt.hashSync(DEV_PASSWORD, 12);
 
 function ensureCredentials() {
   let creds = readJson(CREDENTIALS_FILE);
@@ -192,9 +194,18 @@ function handleSaveData(reqBody, headers, res) {
     return jsonResponse(res, 400, { success: false, error: 'Invalid data payload' });
   }
 
+  // Only http(s)/data URLs are allowed; reject javascript: and other schemes.
+  const isSafeUrl = (u) => typeof u !== 'string' || u === '' || /^(https?:|data:)/i.test(u);
+
   for (const catalog of catalogs) {
     if (!catalog || !catalog.id || !catalog.title || !Array.isArray(catalog.pages)) {
       return jsonResponse(res, 400, { success: false, error: 'Invalid catalog payload' });
+    }
+    if (!isSafeUrl(catalog.coverImage) || !isSafeUrl(catalog.pdfUrl)) {
+      return jsonResponse(res, 400, { success: false, error: 'Unsafe URL' });
+    }
+    if ((catalog.pages || []).some((p) => !isSafeUrl(p))) {
+      return jsonResponse(res, 400, { success: false, error: 'Unsafe URL' });
     }
   }
 
@@ -285,5 +296,5 @@ const server = createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`\n  🔐 NAFAS Dev API Server running on http://localhost:${PORT}`);
   console.log(`  📁 Credentials: ${CREDENTIALS_FILE}`);
-  console.log(`  🗝  Default password: Saeed@79170%\n`);
+  console.log(`  🗝  Set DEV_ADMIN_PASSWORD env var to choose the dev password.\n`);
 });

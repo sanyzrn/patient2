@@ -86,6 +86,12 @@ const MarkdownText: React.FC<{ text: string }> = ({ text }) => (
 const Typewriter: React.FC<{ text: string; onDone: () => void }> = ({ text, onDone }) => {
   const [shown, setShown] = useState('');
   useEffect(() => {
+    // Respect reduced-motion: show the full text immediately, no per-char churn.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setShown(text);
+      onDone();
+      return;
+    }
     let i = 0;
     const id = setInterval(() => {
       i += 3;
@@ -166,9 +172,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
     // For a product chat, surface the quick-reply prompts as suggestions.
     const isProduct = !!p && p.id !== 'nafas';
     const copy = [...messages];
-    // Remove suggestions from last message if any
-    if (copy.length > 0) copy[copy.length - 1].suggestions = undefined;
-    
+    // Remove suggestions from last message if any (immutably — it is in state)
+    if (copy.length > 0) {
+      copy[copy.length - 1] = { ...copy[copy.length - 1]!, suggestions: undefined };
+    }
+
     setMessages([
       ...copy,
       {
@@ -195,7 +203,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
     const addPromptWithSuggestions = (content: string, prefix: string) => {
       setMessages(prev => {
         const copy = [...prev];
-        if (copy.length > 0) copy[copy.length - 1].suggestions = undefined;
+        if (copy.length > 0) {
+          copy[copy.length - 1] = { ...copy[copy.length - 1]!, suggestions: undefined };
+        }
         return [...copy, { id: uid(), role: 'user', content: trimmed }, {
           id: uid(), role: 'assistant', content,
           suggestions: PRODUCTS.map(p => `${prefix} ${p.name}`),
@@ -237,7 +247,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
     // clear suggestions from previous message
     setMessages(prev => {
       const copy = [...prev];
-      if (copy.length > 0) copy[copy.length - 1].suggestions = undefined;
+      if (copy.length > 0) {
+        copy[copy.length - 1] = { ...copy[copy.length - 1]!, suggestions: undefined };
+      }
       return [...copy, userMsg];
     });
     setInput('');
@@ -574,6 +586,9 @@ const AdrForm: React.FC<{ ensureNonce: () => Promise<string>; product: { id: str
       <Field label="داروهای همزمان (اختیاری)"><input className={inputCls} value={f.concomitant_drugs} onChange={e => set('concomitant_drugs', e.target.value)} /></Field>
       <Field label="شرح عارضه"><textarea className={`${inputCls} resize-y`} rows={3} value={f.description} onChange={e => set('description', e.target.value)} /></Field>
       {err && <p className="text-xs text-red-600">{err}</p>}
+      <p className="text-[11px] text-skin-muted leading-relaxed">
+        با ارسال این فرم، با ثبت و پردازش اطلاعات تماس شما برای پیگیری موافقت می‌کنید.
+      </p>
       <div className="grid grid-cols-2 gap-2 mt-4">
         <button disabled={busy} className="bg-skin-primary hover:bg-skin-primary-hover text-white py-2 rounded-xl text-sm font-bold disabled:opacity-60 transition-colors w-full">{busy ? 'در حال ارسال…' : 'ثبت گزارش'}</button>
         <button type="button" onClick={() => onCancel()} disabled={busy} className="bg-skin-control-bg hover:bg-skin-control-hover text-skin-text py-2 rounded-xl text-sm font-bold transition-colors w-full">انصراف</button>
@@ -615,6 +630,9 @@ const ConsultForm: React.FC<{ ensureNonce: () => Promise<string>; product: { id:
       <Field label="شمارهٔ تماس"><input className={inputCls} dir="ltr" value={f.phone} onChange={e => set('phone', e.target.value)} placeholder="09xxxxxxxxx" /></Field>
       <Field label="توضیحات"><textarea className={`${inputCls} resize-y`} rows={4} value={f.description} onChange={e => set('description', e.target.value)} /></Field>
       {err && <p className="text-xs text-red-600">{err}</p>}
+      <p className="text-[11px] text-skin-muted leading-relaxed">
+        با ارسال این فرم، با ثبت و پردازش اطلاعات تماس شما برای پیگیری موافقت می‌کنید.
+      </p>
       <div className="grid grid-cols-2 gap-2 mt-4">
         <button disabled={busy} className="bg-skin-primary hover:bg-skin-primary-hover text-white py-2 rounded-xl text-sm font-bold disabled:opacity-60 transition-colors w-full">{busy ? 'در حال ارسال…' : 'ارسال درخواست'}</button>
         <button type="button" onClick={() => onCancel()} disabled={busy} className="bg-skin-control-bg hover:bg-skin-control-hover text-skin-text py-2 rounded-xl text-sm font-bold transition-colors w-full">انصراف</button>

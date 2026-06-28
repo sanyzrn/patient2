@@ -11,7 +11,9 @@ import {
 } from 'lucide-react';
 import SafeImage from './SafeImage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
-import { trackCatalogView } from '../utils/analytics';
+import { useFocusTrap } from '../hooks/useFocusTrap';
+import { trackCatalogView, trackPageTime } from '../utils/analytics';
+import { isSafeHttpUrl } from '../utils/helpers';
 
 interface BookViewerProps {
   catalog: Catalog;
@@ -98,7 +100,6 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
   const bookRef = useRef<{ pageFlip: () => { flipNext: () => void; flipPrev: () => void; flip: (n: number) => void; pages: { length: number } } }>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const lastFocusedRef = useRef<HTMLElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const thumbStripRef = useRef<HTMLDivElement>(null);
 
@@ -169,32 +170,8 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
     }
   }, [usePdfMode, catalog.pdfUrl]);
 
-  // Focus trap
-  const getFocusable = useCallback((root: HTMLElement): HTMLElement[] => {
-    return Array.from(root.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
-    )).filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
-  }, []);
-
-  useEffect(() => {
-    lastFocusedRef.current = document.activeElement as HTMLElement;
-    const root = dialogRef.current;
-    if (!root) return;
-    const focusables = getFocusable(root);
-    (focusables[0] ?? root).focus();
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
-      if (e.key !== 'Tab') return;
-      const items = getFocusable(root);
-      if (items.length === 0) return;
-      const first = items[0]!;
-      const last = items[items.length - 1]!;
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => { document.removeEventListener('keydown', onKeyDown); lastFocusedRef.current?.focus?.(); };
-  }, [getFocusable, onClose]);
+  // Focus trap + Escape (shared hook)
+  useFocusTrap(dialogRef, onClose);
 
   // Thumb strip scroll
   useEffect(() => {
@@ -274,28 +251,12 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
     localStorage.setItem(`nafas_progress_${catalog.id}`, String(e.data));
   }, [playSound, catalog.id]);
 
-  // Analytics: view count
-  useEffect(() => {
-    const statsStr = localStorage.getItem('nafas_analytics');
-    const stats = statsStr ? JSON.parse(statsStr) : { viewsByCatalog: {}, timeByCatalogPage: {} };
-    stats.viewsByCatalog[catalog.id] = (stats.viewsByCatalog[catalog.id] || 0) + 1;
-    localStorage.setItem('nafas_analytics', JSON.stringify(stats));
-  }, [catalog.id]);
-
-  // Analytics: time per page
+  // Analytics: time per page (view count is handled once by trackCatalogView above).
   useEffect(() => {
     const startTime = Date.now();
     return () => {
       const duration = Math.floor((Date.now() - startTime) / 1000);
-      if (duration > 0) {
-        const statsStr = localStorage.getItem('nafas_analytics');
-        const stats = statsStr ? JSON.parse(statsStr) : { viewsByCatalog: {}, timeByCatalogPage: {} };
-        if (!stats.timeByCatalogPage) stats.timeByCatalogPage = {};
-        if (!stats.timeByCatalogPage[catalog.id]) stats.timeByCatalogPage[catalog.id] = {};
-        const currentDur = stats.timeByCatalogPage[catalog.id][currentPage] || 0;
-        stats.timeByCatalogPage[catalog.id][currentPage] = currentDur + duration;
-        localStorage.setItem('nafas_analytics', JSON.stringify(stats));
-      }
+      trackPageTime(catalog.id, currentPage, duration);
     };
   }, [currentPage, catalog.id]);
 
@@ -330,14 +291,16 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
   };
 
   const handleDownload = () => {
-    const link = document.createElement('a');
-    if (catalog.pdfUrl) {
+    if (catalog.pdfUrl && isSafeHttpUrl(catalog.pdfUrl)) {
+      const link = document.createElement('a');
       link.href = catalog.pdfUrl;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    } else if (catalog.pages[0]) {
+    } else if (catalog.pages[0] && isSafeHttpUrl(catalog.pages[0], true)) {
       window.open(catalog.pages[0], '_blank', 'noopener,noreferrer');
+    } else {
+      toast.error('آدرس نامعتبر است.');
     }
   };
 

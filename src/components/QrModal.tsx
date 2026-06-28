@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Catalog } from '../types';
 import QRCode from 'qrcode';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface QrModalProps {
   catalog: Catalog;
@@ -10,7 +11,10 @@ interface QrModalProps {
 
 const QrModal: React.FC<QrModalProps> = ({ catalog, onClose }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const url = `${window.location.origin}${window.location.pathname}?cat=${catalog.id}`;
+
+  useFocusTrap(panelRef, onClose);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -35,8 +39,11 @@ const QrModal: React.FC<QrModalProps> = ({ catalog, onClose }) => {
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         className="bg-skin-card rounded-2xl p-6 text-center shadow-2xl max-w-sm w-full mx-4"
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
         <div className="flex items-center justify-between mb-4">
           <p className="font-black text-skin-text text-sm">{catalog.title}</p>

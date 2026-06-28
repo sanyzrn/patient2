@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 
 /**
@@ -63,8 +63,11 @@ export const useFavorites = () => {
     setFavorites(new Set());
   }, []);
 
+  // Stable array reference so downstream memoization/consumers don't recompute every render.
+  const favoritesArray = useMemo(() => Array.from(favorites), [favorites]);
+
   return {
-    favorites: Array.from(favorites),
+    favorites: favoritesArray,
     isFavorite,
     addFavorite,
     removeFavorite,

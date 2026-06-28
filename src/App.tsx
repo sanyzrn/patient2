@@ -32,7 +32,7 @@ import { dateToNumber, highlightText } from './utils/helpers';
 import { useCountUp } from './hooks/useCountUp';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useFavorites } from './hooks/useFavorites';
-import { useReadingStreak } from './hooks/useReadingStreak';
+import { useReadingStreak, checkStreakMilestone } from './hooks/useReadingStreak';
 import { LOGO_URL, LOGO_URL_DARK, DBS_LOGO_URL, DBS_URL, APP_VERSION } from './constants/brand';
 
 // ARCH-03: Lazy load heavy components
@@ -363,7 +363,7 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
           </div>
         </div>
 
-        <PhoneDirectory open={extOpen} onClose={() => setExtOpen(false)} />
+        {extOpen && <PhoneDirectory open onClose={() => setExtOpen(false)} />}
 
         {/* Bottom row */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 mt-6 border-t border-skin-border">
@@ -427,7 +427,7 @@ const InnerApp: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const isOnline = useOnlineStatus();
   const { favorites, toggleFavorite, isFavorite, clearAll: clearFavorites } = useFavorites();
-  const { recordRead } = useReadingStreak();
+  const { recordRead, streak } = useReadingStreak();
   const [chatOpen, setChatOpen] = useState(false);
 
   // UI state
@@ -618,8 +618,10 @@ const InnerApp: React.FC = () => {
     setOpenCatalogPage(page);
     addRecent(catalog.id);
     recordRead(); // SURPRISE-03: Track reading streak
+    const milestone = checkStreakMilestone(streak);
+    if (milestone) toast.success(milestone);
     window.history.pushState({}, '', `${window.location.pathname}?cat=${catalog.id}&page=${page + 1}`);
-  }, [addRecent, recordRead]);
+  }, [addRecent, recordRead, streak]);
 
   const handleCloseViewer = useCallback(() => {
     setOpenCatalog(null);
@@ -711,14 +713,14 @@ const InnerApp: React.FC = () => {
     return favorites.map(id => catalogs.find(c => c.id === id)).filter((c): c is Catalog => !!c);
   }, [favorites, catalogs]);
 
-  const filteredVideos = (() => {
+  const filteredVideos = useMemo(() => {
     const query = videoSearch.trim().toLowerCase();
     if (!query) return videos;
     return videos.filter(v =>
       v.title.toLowerCase().includes(query) ||
       v.description.toLowerCase().includes(query)
     );
-  })();
+  }, [videos, videoSearch]);
 
   const showFavoritesRow = favoriteCatalogs.length > 0 && !searchTerm && !selectedCategory;
 
@@ -740,7 +742,7 @@ const InnerApp: React.FC = () => {
   }, []);
 
   // Build command palette commands
-  const paletteCommands: PaletteCommand[] = [
+  const paletteCommands: PaletteCommand[] = useMemo(() => [
     // Theme commands
     { id: 'theme-light', label: 'پوسته روشن', group: 'تم', action: () => setTheme('light'), keywords: ['روشن', 'light'] },
     { id: 'theme-dark', label: 'پوسته تاریک', group: 'تم', action: () => setTheme('dark'), keywords: ['تاریک', 'dark'] },
@@ -752,7 +754,7 @@ const InnerApp: React.FC = () => {
     { id: 'go-products', label: 'رفتن به محصولات', group: 'ناوبری', action: () => productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }), keywords: ['محصول'] },
 
     // Admin commands
-    { id: 'admin-panel', label: 'باز کردن پنل مدیریت', group: 'مدیریت', action: () => { setViewMode('admin-login'); setShowCommandPalette(false); }, keywords: ['مدیریت', 'admin'] },
+    { id: 'admin-panel', label: 'باز کردن پنل مدیریت', group: 'مدیریت', action: () => { enterAdmin(); setShowCommandPalette(false); }, keywords: ['مدیریت', 'admin'] },
 
     // Clear commands
     { id: 'clear-recent', label: 'پاک کردن تاریخچه مشاهده', group: 'پاکسازی', action: () => { clearRecent(); toast.success('تاریخچه پاک شد'); }, keywords: ['تاریخچه', 'recent'] },
@@ -766,7 +768,7 @@ const InnerApp: React.FC = () => {
       action: () => { handleOpenCatalog(cat); setShowCommandPalette(false); },
       keywords: [cat.title, cat.category],
     })),
-  ];
+  ], [catalogs, handleOpenCatalog, clearRecent, clearFavorites, setTheme, enterAdmin, setShowCommandPalette]);
 
   // -- Admin views --
   if (viewMode === 'admin-login') {
@@ -807,7 +809,7 @@ const InnerApp: React.FC = () => {
             className="fixed top-[2px] inset-x-0 z-[99] bg-amber-500 text-white text-center text-xs py-1.5 font-bold flex items-center justify-center gap-2"
           >
             <span>📡</span>
-            آفلاین هستید — محتوای ذخیره‌شده نمایش داده می‌شود
+            آفلاین هستید — برخی قابلیت‌ها در دسترس نیست
           </motion.div>
         )}
       </AnimatePresence>
@@ -988,16 +990,20 @@ const InnerApp: React.FC = () => {
                 <button
                   onClick={() => setLangFilter(langFilter === 'fa' ? null : 'fa')}
                   title="فیلتر فارسی"
-                  className={`w-8 h-8 rounded-xl text-base flex items-center justify-center transition-all border-2 ${langFilter === 'fa' ? 'bg-skin-primary/10 border-skin-primary' : 'border-skin-border hover:border-skin-primary/30'}`}
+                  aria-label="فیلتر فارسی"
+                  aria-pressed={langFilter === 'fa'}
+                  className={`h-8 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === 'fa' ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
                 >
-                  🇮🇷
+                  <span aria-hidden>🇮🇷</span> FA
                 </button>
                 <button
                   onClick={() => setLangFilter(langFilter === 'en' ? null : 'en')}
                   title="فیلتر انگلیسی"
-                  className={`w-8 h-8 rounded-xl text-base flex items-center justify-center transition-all border-2 ${langFilter === 'en' ? 'bg-skin-primary/10 border-skin-primary' : 'border-skin-border hover:border-skin-primary/30'}`}
+                  aria-label="فیلتر انگلیسی"
+                  aria-pressed={langFilter === 'en'}
+                  className={`h-8 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === 'en' ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
                 >
-                  🇬🇧
+                  <span aria-hidden>🇬🇧</span> EN
                 </button>
               </div>
             </div>
