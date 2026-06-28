@@ -15,7 +15,8 @@ export default defineConfig({
   // Strip noisy logs from production bundles; keep console.warn/error for diagnostics.
   esbuild: {
     drop: ['debugger'],
-    pure: ['console.log', 'console.debug', 'console.info'],
+    // Keep console.debug for intentional diagnostics; only strip log/info noise.
+    pure: ['console.log', 'console.info'],
   },
   server: {
     watch: {

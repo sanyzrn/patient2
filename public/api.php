@@ -9,6 +9,8 @@
  */
 
 header('Content-Type: application/json; charset=utf-8');
+// Admin/content JSON must never be cached by intermediaries.
+header('Cache-Control: no-store, max-age=0');
 
 // CORS: restrict to ALLOWED_ORIGINS env var (comma-separated). Never use "*".
 $allowed_origins = array_filter(array_map('trim', explode(',', getenv('ALLOWED_ORIGINS') ?: 'http://localhost:5173,http://localhost:3000')));
