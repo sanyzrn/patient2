@@ -173,13 +173,17 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
   // Focus trap + Escape (shared hook)
   useFocusTrap(dialogRef, onClose);
 
-  // Thumb strip scroll
+  // Thumb strip scroll — keep the active thumbnail centered.
+  // Only when the bottom panel is expanded: while collapsed the strip is still
+  // in the DOM (h-0 / translated off-screen), and scrollIntoView would scroll
+  // the whole viewer up to "reveal" it (hiding the header). See bug report.
   useEffect(() => {
+    if (!showBottomPanel) return;
     const strip = thumbStripRef.current;
     if (!strip) return;
     const active = strip.querySelector<HTMLElement>(`[data-thumb="${currentPage}"]`);
     if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  }, [currentPage]);
+  }, [currentPage, showBottomPanel]);
 
   // Keyboard navigation
   useEffect(() => {
