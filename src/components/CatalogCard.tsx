@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { BookOpen, Download, FileText, Link2, Printer, ChevronDown, Heart, Volume2, VolumeX, QrCode, Package } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -251,12 +250,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
   const [showQrModal, setShowQrModal] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [shimmerActive, setShimmerActive] = useState(false);
-  
-  // MISSING-03: Hover card preview
-  const [showPreview, setShowPreview] = useState(false);
-  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [previewPos, setPreviewPos] = useState<{ top: number; right: number } | null>(null);
+
   // UX-09: Load saved reading progress
   const [savedPage, setSavedPage] = useState<number | null>(null);
   // SURPRISE-09: Check if this catalog is cached
@@ -412,7 +406,6 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
   return (
     <>
       <motion.div
-      ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: animationDelay, duration: 0.35, ease: 'easeOut' }}
@@ -420,20 +413,6 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
         shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)]
         hover:border-skin-primary/30 transition-all duration-300 flex flex-col relative"
       onClick={() => onClick(catalog, savedPage ?? 0)}
-      onMouseEnter={() => {
-        // MISSING-03: Show preview after 600ms hover
-        previewTimerRef.current = setTimeout(() => {
-          if (cardRef.current && window.matchMedia('(pointer: fine)').matches) {
-            const rect = cardRef.current.getBoundingClientRect();
-            setPreviewPos({ top: rect.top, right: window.innerWidth - rect.right + 12 });
-            setShowPreview(true);
-          }
-        }, 600);
-      }}
-      onMouseLeave={() => {
-        clearTimeout(previewTimerRef.current);
-        setShowPreview(false);
-      }}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(catalog, savedPage ?? 0); } }}
@@ -548,36 +527,6 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
     </motion.div>
     {/* SURPRISE-02: QR Modal */}
     {showQrModal && <QrModal catalog={catalog} onClose={() => setShowQrModal(false)} />}
-    
-    {/* MISSING-03: Hover card preview popup */}
-    {showPreview && previewPos && createPortal(
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="fixed z-40 bg-skin-card border border-skin-border rounded-2xl shadow-2xl overflow-hidden w-80 pointer-events-none"
-        style={{ top: `${previewPos.top}px`, right: `${previewPos.right}px` }}
-      >
-        {/* Cover image */}
-        <div className="aspect-[2/3] overflow-hidden bg-skin-control-bg">
-          <img src={catalog.coverImage} alt="" className="w-full h-full object-cover" />
-        </div>
-        
-        {/* Info */}
-        <div className="p-4">
-          <h3 className="font-bold text-skin-text text-sm mb-2 line-clamp-2">{catalog.title}</h3>
-          <p className="text-xs text-skin-muted line-clamp-2 mb-3">{catalog.description}</p>
-          
-          {/* Meta */}
-          <div className="flex items-center gap-2 text-xs text-skin-muted">
-            <span>{catalog.pageCount} صفحه</span>
-            <span>·</span>
-            <span>{catalog.language === 'en' ? '🇬🇧' : '🇮🇷'}</span>
-          </div>
-        </div>
-      </motion.div>,
-      document.body
-    )}
     </>
   );
 };
