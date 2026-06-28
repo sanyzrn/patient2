@@ -316,7 +316,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] md:inset-auto md:bottom-24 md:left-6 p-4 md:p-0 flex items-end justify-center md:items-stretch md:justify-start" dir="rtl">
+    <div className="fixed inset-0 z-[60] md:inset-auto md:bottom-24 md:left-6 md:flex md:items-stretch md:justify-start" dir="rtl">
       {/* Mobile backdrop */}
       <motion.div
         className="md:hidden absolute inset-0 bg-black/40"
@@ -326,13 +326,15 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
         transition={{ duration: 0.2 }}
       />
 
+      {/* Mobile: smaller box (narrower from the right, shorter top & bottom),
+          floating above the bottom nav. Desktop: anchored beside the launcher. */}
       <motion.div
         ref={containerRef}
         initial={{ opacity: 0, y: 24, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
         style={{ transformOrigin: 'bottom left' }}
-        className="relative w-full md:w-[380px] h-[80vh] md:h-[600px] max-h-[680px] md:max-h-[calc(100vh-7rem)] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden mb-4 md:mb-0"
+        className="absolute md:static left-4 right-[13%] bottom-28 h-[68vh] w-auto md:w-[380px] md:h-[600px] max-h-[600px] md:max-h-[calc(100vh-7rem)] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden"
       >
         {/* Header */}
         <div className="shrink-0 bg-gradient-to-l from-skin-primary to-skin-primary-hover text-white px-4 py-3 flex items-center justify-between shadow-sm">
