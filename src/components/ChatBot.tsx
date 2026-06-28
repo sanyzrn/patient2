@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion } from 'motion/react';
 import {
   X, Send, ArrowRight, MessageCircle, Building2,
   ThumbsUp, ThumbsDown, Loader2, Star, RefreshCw,
@@ -315,26 +316,43 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] md:inset-auto md:bottom-6 md:left-6 p-4 md:p-0 flex items-end justify-center md:items-stretch md:justify-start" dir="rtl">
+    <div className="fixed inset-0 z-[60] md:inset-auto md:bottom-24 md:left-6 p-4 md:p-0 flex items-end justify-center md:items-stretch md:justify-start" dir="rtl">
       {/* Mobile backdrop */}
-      <div className="md:hidden absolute inset-0 bg-black/40" onClick={handleClose} />
+      <motion.div
+        className="md:hidden absolute inset-0 bg-black/40"
+        onClick={handleClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      />
 
-      <div ref={containerRef} className="relative w-full md:w-[380px] h-[80vh] md:h-[600px] max-h-[680px] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden mb-4 md:mb-0">
+      <motion.div
+        ref={containerRef}
+        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+        style={{ transformOrigin: 'bottom left' }}
+        className="relative w-full md:w-[380px] h-[80vh] md:h-[600px] max-h-[680px] md:max-h-[calc(100vh-7rem)] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden mb-4 md:mb-0"
+      >
         {/* Header */}
-        <div className="shrink-0 bg-skin-primary text-white px-4 py-3 flex items-center justify-between">
+        <div className="shrink-0 bg-gradient-to-l from-skin-primary to-skin-primary-hover text-white px-4 py-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2">
             {view !== 'chat' && (
               <button onClick={() => setView('chat')} className="p-1 hover:bg-white/15 rounded-lg transition-colors" aria-label="بازگشت">
                 <ArrowRight size={18} />
               </button>
             )}
-            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-white/20 ring-1 ring-white/25 flex items-center justify-center">
               <MessageCircle size={18} />
             </div>
             <div className="leading-tight">
               <p className="font-bold text-sm">دستیار هوشمند نفس</p>
               <p className="text-[11px] text-white/80 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300" /> آنلاین
+                <span className="relative flex w-1.5 h-1.5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full w-1.5 h-1.5 bg-emerald-300" />
+                </span>
+                آنلاین
               </p>
             </div>
           </div>
@@ -380,14 +398,17 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
               onSubmit={(e) => { e.preventDefault(); send(input); }}
               className="flex items-end gap-2"
             >
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
-                rows={1}
-                placeholder="پیامتان را بنویسید…"
-                className="flex-1 resize-none max-h-24 px-3 py-2 text-sm bg-skin-control-bg border border-skin-border rounded-xl outline-none focus:border-skin-primary"
-              />
+              {/* Minimal animated gradient/glow border around the input */}
+              <div className="ai-input-border flex-1 rounded-xl p-[1.5px]">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
+                  rows={1}
+                  placeholder="پیامتان را بنویسید…"
+                  className="w-full resize-none max-h-24 px-3 py-2 text-sm bg-skin-control-bg rounded-[11px] outline-none border-0 block"
+                />
+              </div>
               {SpeechCtor && (
                 <button type="button" onClick={toggleMic} aria-label="گفتن با صدا" className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors ${listening ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-skin-control-bg text-skin-muted hover:text-skin-primary'}`}>
                   <Mic size={18} />
@@ -423,7 +444,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };
