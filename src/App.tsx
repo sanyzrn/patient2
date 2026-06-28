@@ -1122,14 +1122,16 @@ const InnerApp: React.FC = () => {
 
 
       {/* ─── Bottom Mobile Nav (floating pill) ─────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 bg-skin-card/90 backdrop-blur-xl border border-skin-border rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.16)] px-2 py-1.5">
+      {/* Stays above the chat backdrop (un-dimmed) while the chat is open. */}
+      <nav id="mobile-nav" className={`md:hidden fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 flex items-center gap-1 bg-skin-card/90 backdrop-blur-xl border border-skin-border rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.16)] px-2 py-1.5 ${chatOpen ? 'z-[70]' : 'z-40'}`}>
         {([
-          { key: 'catalogs', icon: <BookOpen size={18} />, label: 'کاتالوگ', onClick: () => catalogsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }) },
-          { key: 'videos', icon: <Video size={18} />, label: 'ویدئو', onClick: () => videosSectionRef.current?.scrollIntoView({ behavior: 'smooth' }) },
-          { key: 'products', icon: <BookMarked size={18} />, label: 'محصولات', onClick: () => productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }) },
-          { key: 'chat', icon: <MessageCircle size={18} />, label: 'گفت‌وگو', onClick: () => setChatOpen(true) },
+          { key: 'catalogs', icon: <BookOpen size={18} />, label: 'کاتالوگ', onClick: () => { setChatOpen(false); catalogsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
+          { key: 'videos', icon: <Video size={18} />, label: 'ویدئو', onClick: () => { setChatOpen(false); videosSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
+          { key: 'products', icon: <BookMarked size={18} />, label: 'محصولات', onClick: () => { setChatOpen(false); productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
+          { key: 'chat', icon: <MessageCircle size={18} />, label: 'گفت‌وگو', onClick: () => setChatOpen(o => !o) },
         ] as { key: string; icon: React.ReactNode; label: string; onClick: () => void }[]).map(item => {
-          const isActive = activeSection === item.key;
+          // While the chat is open, only the chat icon is highlighted; the rest reset.
+          const isActive = chatOpen ? item.key === 'chat' : activeSection === item.key;
           return (
             <button
               key={item.key}
