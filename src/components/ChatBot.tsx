@@ -286,7 +286,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      // Don't auto-close when interacting with the mobile bottom nav — it stays
+      // visible above the chat and controls open/close itself.
+      if (target instanceof Element && target.closest('#mobile-nav')) return;
+      if (containerRef.current && !containerRef.current.contains(target)) {
         onClose();
       }
     };
@@ -334,7 +338,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
         style={{ transformOrigin: 'bottom left' }}
-        className="absolute md:static left-4 right-[13%] bottom-28 h-[68vh] w-auto md:w-[380px] md:h-[600px] max-h-[600px] md:max-h-[calc(100vh-7rem)] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden"
+        className="absolute md:static left-4 right-[13%] bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4.25rem)] md:bottom-auto h-[68vh] w-auto md:w-[380px] md:h-[600px] max-h-[600px] md:max-h-[calc(100vh-7rem)] bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col overflow-hidden"
       >
         {/* Header */}
         <div className="shrink-0 bg-gradient-to-l from-skin-primary to-skin-primary-hover text-white px-4 py-3 flex items-center justify-between shadow-sm">
