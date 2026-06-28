@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Video } from '../types';
 import { X, Calendar, Tv2 } from 'lucide-react';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface VideoPlayerProps {
   video: Video;
@@ -11,7 +12,6 @@ interface VideoPlayerProps {
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const lastFocusRef = useRef<HTMLElement | null>(null);
   const [pipAvailable, setPipAvailable] = useState(false);
   const [pipActive, setPipActive] = useState(false);
   // Fix 7: Add error state for video loading failures
@@ -33,38 +33,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
     setPipAvailable(document.pictureInPictureEnabled ?? false);
   }, []);
 
-  // Focus trap (Fix 1.10)
-  const getFocusable = useCallback((root: HTMLElement): HTMLElement[] => {
-    return Array.from(
-      root.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
-  }, []);
-
-  useEffect(() => {
-    lastFocusRef.current = document.activeElement as HTMLElement;
-    const root = dialogRef.current;
-    if (!root) return;
-    const focusable = getFocusable(root);
-    (focusable[0] ?? root).focus();
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
-      if (e.key !== 'Tab') return;
-      const items = getFocusable(root);
-      if (items.length === 0) return;
-      const first = items[0]!;
-      const last = items[items.length - 1]!;
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      lastFocusRef.current?.focus?.();
-    };
-  }, [getFocusable, onClose]);
+  // Focus trap + Escape (shared hook)
+  useFocusTrap(dialogRef, onClose);
 
   // PiP handlers
   const togglePip = async () => {

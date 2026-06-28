@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import SafeImage from './SafeImage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { trackCatalogView, trackPageTime } from '../utils/analytics';
 import { isSafeHttpUrl } from '../utils/helpers';
 
@@ -99,7 +100,6 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
   const bookRef = useRef<{ pageFlip: () => { flipNext: () => void; flipPrev: () => void; flip: (n: number) => void; pages: { length: number } } }>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const lastFocusedRef = useRef<HTMLElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const thumbStripRef = useRef<HTMLDivElement>(null);
 
@@ -170,32 +170,8 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
     }
   }, [usePdfMode, catalog.pdfUrl]);
 
-  // Focus trap
-  const getFocusable = useCallback((root: HTMLElement): HTMLElement[] => {
-    return Array.from(root.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
-    )).filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
-  }, []);
-
-  useEffect(() => {
-    lastFocusedRef.current = document.activeElement as HTMLElement;
-    const root = dialogRef.current;
-    if (!root) return;
-    const focusables = getFocusable(root);
-    (focusables[0] ?? root).focus();
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
-      if (e.key !== 'Tab') return;
-      const items = getFocusable(root);
-      if (items.length === 0) return;
-      const first = items[0]!;
-      const last = items[items.length - 1]!;
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => { document.removeEventListener('keydown', onKeyDown); lastFocusedRef.current?.focus?.(); };
-  }, [getFocusable, onClose]);
+  // Focus trap + Escape (shared hook)
+  useFocusTrap(dialogRef, onClose);
 
   // Thumb strip scroll
   useEffect(() => {
