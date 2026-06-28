@@ -586,6 +586,9 @@ const AdrForm: React.FC<{ ensureNonce: () => Promise<string>; product: { id: str
       <Field label="داروهای همزمان (اختیاری)"><input className={inputCls} value={f.concomitant_drugs} onChange={e => set('concomitant_drugs', e.target.value)} /></Field>
       <Field label="شرح عارضه"><textarea className={`${inputCls} resize-y`} rows={3} value={f.description} onChange={e => set('description', e.target.value)} /></Field>
       {err && <p className="text-xs text-red-600">{err}</p>}
+      <p className="text-[11px] text-skin-muted leading-relaxed">
+        با ارسال این فرم، با ثبت و پردازش اطلاعات تماس شما برای پیگیری موافقت می‌کنید.
+      </p>
       <div className="grid grid-cols-2 gap-2 mt-4">
         <button disabled={busy} className="bg-skin-primary hover:bg-skin-primary-hover text-white py-2 rounded-xl text-sm font-bold disabled:opacity-60 transition-colors w-full">{busy ? 'در حال ارسال…' : 'ثبت گزارش'}</button>
         <button type="button" onClick={() => onCancel()} disabled={busy} className="bg-skin-control-bg hover:bg-skin-control-hover text-skin-text py-2 rounded-xl text-sm font-bold transition-colors w-full">انصراف</button>
@@ -627,6 +630,9 @@ const ConsultForm: React.FC<{ ensureNonce: () => Promise<string>; product: { id:
       <Field label="شمارهٔ تماس"><input className={inputCls} dir="ltr" value={f.phone} onChange={e => set('phone', e.target.value)} placeholder="09xxxxxxxxx" /></Field>
       <Field label="توضیحات"><textarea className={`${inputCls} resize-y`} rows={4} value={f.description} onChange={e => set('description', e.target.value)} /></Field>
       {err && <p className="text-xs text-red-600">{err}</p>}
+      <p className="text-[11px] text-skin-muted leading-relaxed">
+        با ارسال این فرم، با ثبت و پردازش اطلاعات تماس شما برای پیگیری موافقت می‌کنید.
+      </p>
       <div className="grid grid-cols-2 gap-2 mt-4">
         <button disabled={busy} className="bg-skin-primary hover:bg-skin-primary-hover text-white py-2 rounded-xl text-sm font-bold disabled:opacity-60 transition-colors w-full">{busy ? 'در حال ارسال…' : 'ارسال درخواست'}</button>
         <button type="button" onClick={() => onCancel()} disabled={busy} className="bg-skin-control-bg hover:bg-skin-control-hover text-skin-text py-2 rounded-xl text-sm font-bold transition-colors w-full">انصراف</button>

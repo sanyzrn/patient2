@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { X, Search, Phone, Hash, Building2, Factory, ChevronDown } from 'lucide-react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface PhoneDirectoryProps {
   open: boolean;
@@ -98,10 +99,13 @@ const PhoneDirectory: React.FC<PhoneDirectoryProps> = ({ open, onClose }) => {
   const [q, setQ] = useState('');
   const [openOffice, setOpenOffice] = useState(false);
   const [openFactory, setOpenFactory] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
   const term = q.trim().toLowerCase();
 
   const office = useMemo(() => term ? OFFICE.filter(e => matches(e, term)) : OFFICE, [term]);
   const factory = useMemo(() => term ? FACTORY.filter(e => matches(e, term)) : FACTORY, [term]);
+
+  useFocusTrap(panelRef, onClose);
 
   if (!open) return null;
 
@@ -113,7 +117,13 @@ const PhoneDirectory: React.FC<PhoneDirectoryProps> = ({ open, onClose }) => {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" dir="rtl">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col max-h-[82vh] overflow-hidden">
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="دفترچهٔ تلفن داخلی"
+        className="relative w-full max-w-md bg-skin-card rounded-2xl shadow-2xl border border-skin-border flex flex-col max-h-[82vh] overflow-hidden"
+      >
         {/* Header */}
         <div className="shrink-0 px-4 py-3 border-b border-skin-border flex items-center justify-between">
           <div className="flex items-center gap-2">

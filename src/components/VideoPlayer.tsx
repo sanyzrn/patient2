@@ -68,15 +68,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-fade-in p-4"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`پخش ویدئو: ${video.title}`}
     >
       <div
         ref={dialogRef}
         className="bg-skin-card rounded-2xl shadow-2xl border border-skin-border w-full max-w-4xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`پخش ویدئو: ${video.title}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between gap-3 p-4 border-b border-skin-border flex-wrap">
@@ -138,6 +138,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
               src={video.videoUrl}
               controls
               autoPlay
+              muted
               className="w-full max-h-[70vh] outline-none"
               playsInline
               onError={(e) => {
