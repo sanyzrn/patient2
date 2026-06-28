@@ -77,11 +77,17 @@ exit(json_encode(['error' => 'Unknown action', 'valid' => false]));
 
 function ensure_credentials(string $credentials_file): array {
     if (!file_exists($credentials_file)) {
-        // Initial admin password (bcrypt hash — plaintext is never stored in source).
+        // Never auto-create a known-password account. The initial admin password
+        // hash must be provided by the operator via an environment variable.
+        $provided_hash = getenv('NAFAS_ADMIN_PASSWORD_HASH') ?: '';
+        if ($provided_hash === '') {
+            http_response_code(503);
+            exit(json_encode(['error' => 'Admin not configured', 'valid' => false]));
+        }
         $default_credentials = [
-            'password' => '$2y$10$PADjoIOS3UWVPVmv85GwZOA6nPYYYYdLhd9qUJIfDviBm9Smka4r.',
+            'password'   => $provided_hash,
             'created_at' => date('Y-m-d H:i:s'),
-            'note' => 'Change this password from the admin panel (Settings) when convenient.'
+            'note'       => 'Initialized from NAFAS_ADMIN_PASSWORD_HASH.'
         ];
         file_put_contents($credentials_file, json_encode($default_credentials, JSON_PRETTY_PRINT));
         chmod($credentials_file, 0600);

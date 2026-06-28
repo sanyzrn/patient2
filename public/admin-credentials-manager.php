@@ -337,36 +337,16 @@ function show_credentials() {
 }
 
 function reset_credentials() {
-    global $CREDENTIALS_FILE;
-    
-    // Restore the initial admin password (bcrypt hash; plaintext not in source).
-    $hashed = '$2y$10$PADjoIOS3UWVPVmv85GwZOA6nPYYYYdLhd9qUJIfDviBm9Smka4r.';
-    $credentials = [
-        'password' => $hashed,
-        'created_at' => date('Y-m-d H:i:s'),
-        'note' => 'Reset to the initial admin password via CLI'
-    ];
-
-    file_put_contents($CREDENTIALS_FILE, json_encode($credentials, JSON_PRETTY_PRINT));
-    chmod($CREDENTIALS_FILE, 0600);
-
-    echo "✓ Credentials reset to the initial admin password\n";
+    if (file_exists(CREDENTIALS_FILE)) {
+        unlink(CREDENTIALS_FILE);
+    }
+    echo "✓ Credentials cleared. Reconfigure with NAFAS_ADMIN_PASSWORD_HASH.\n";
 }
 
 function reset_credentials_web() {
-    global $CREDENTIALS_FILE;
-    
-    // Restore the initial admin password (bcrypt hash; plaintext not in source).
-    $hashed = '$2y$10$PADjoIOS3UWVPVmv85GwZOA6nPYYYYdLhd9qUJIfDviBm9Smka4r.';
-    $credentials = [
-        'password' => $hashed,
-        'created_at' => date('Y-m-d H:i:s'),
-        'note' => 'Reset to the initial admin password from web interface'
-    ];
-    
-    file_put_contents($CREDENTIALS_FILE, json_encode($credentials, JSON_PRETTY_PRINT));
-    chmod($CREDENTIALS_FILE, 0600);
-    
+    if (file_exists(CREDENTIALS_FILE)) {
+        unlink(CREDENTIALS_FILE);
+    }
     exit(json_encode(['success' => true]));
 }
 

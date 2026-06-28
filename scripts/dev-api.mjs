@@ -72,7 +72,8 @@ function writeJson(path, data) {
 }
 
 // ─── Credentials ──────────────────────────────────────────────────────────────
-const DEFAULT_PASSWORD_HASH = bcrypt.hashSync('Saeed@79170%', 12);
+const DEV_PASSWORD = process.env.DEV_ADMIN_PASSWORD || 'changeme-dev-only';
+const DEFAULT_PASSWORD_HASH = bcrypt.hashSync(DEV_PASSWORD, 12);
 
 function ensureCredentials() {
   let creds = readJson(CREDENTIALS_FILE);
@@ -285,5 +286,5 @@ const server = createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`\n  🔐 NAFAS Dev API Server running on http://localhost:${PORT}`);
   console.log(`  📁 Credentials: ${CREDENTIALS_FILE}`);
-  console.log(`  🗝  Default password: Saeed@79170%\n`);
+  console.log(`  🗝  Set DEV_ADMIN_PASSWORD env var to choose the dev password.\n`);
 });
