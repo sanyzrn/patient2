@@ -1,87 +1,196 @@
-# Nafas Pharmed — Patient Portal
+<div dir="rtl">
 
-A React + Vite + TypeScript (RTL, Persian) patient education portal: catalogs,
-videos, products, an offline-capable PWA, and a small file-based PHP admin API.
+# آموزش و حمایت از بیمار | نفس زیست فارمد
 
-## Requirements
+پورتال جامع آموزش و حمایت از بیماران شرکت **نفس زیست فارمد**؛ شامل کاتالوگ‌های آموزشی تعاملی، بروشورهای دارویی (PDF با حالت کتاب‌خوان)، ویدئوهای آموزشی و پنل مدیریت محتوا.
 
-- Node.js 18+ (and npm)
-- For the production backend: PHP 8.x on the web host
+اپلیکیشن یک **SPA** مبتنی بر React 19 + TypeScript است که به‌صورت **PWA** قابل نصب روی موبایل و دسکتاپ بوده و با یک بک‌اند سبک PHP برای ذخیرهٔ محتوا و احراز هویت مدیر کار می‌کند.
 
-## Install
+---
+
+## ✨ امکانات
+
+- **کاتالوگ‌های آموزشی** با جست‌وجوی پیشرفته (عنوان، توضیح و فهرست مطالب) به کمک Fuse.js
+- **کتاب‌خوان PDF تعاملی** (`BookViewer`) با حالت ورق‌زدن، هایلایت، یادداشت‌گذاری و خروجی JSON یادداشت‌ها
+- **پخش‌کنندهٔ ویدئو** آموزشی
+- **پنل مدیریت** کامل برای ویرایش کاتالوگ‌ها، ویدئوها و بنرها (با جست‌وجو، CRUD، آمار، ورود/خروجی JSON و تغییر رمز عبور) بدون نیاز به استقرار مجدد
+- **Command Palette** (جست‌وجوی سریع با صفحه‌کلید)، **علاقه‌مندی‌ها**، **رکورد مطالعه**، **QR Code** و افکت‌های UX
+- **PWA**: کش آفلاین، نصب‌پذیری، به‌روزرسانی خودکار (Workbox)
+- کاملاً **راست‌چین (RTL) و فارسی** با فونت وزیرمتن
+
+---
+
+## 🧱 پشتهٔ فنی
+
+| لایه | فناوری |
+|------|--------|
+| فرانت‌اند | React 19، TypeScript 5.9، Vite 7 |
+| استایل | Tailwind CSS 4 |
+| انیمیشن | Motion |
+| نمودار | Recharts |
+| PDF | pdfjs-dist + react-pageflip |
+| جست‌وجو | Fuse.js |
+| PWA | vite-plugin-pwa (Workbox) |
+| بک‌اند | PHP (بدون فریم‌ورک) |
+
+---
+
+## 📁 ساختار پروژه
+
+</div>
+
+```
+.
+├── index.html              # نقطهٔ ورود؛ data.js را قبل از اپ بارگذاری می‌کند
+├── data.ts                 # دادهٔ پیش‌فرض کاتالوگ‌ها/ویدئوها/بنرها (منبع حقیقت)
+├── vite.config.ts          # پیکربندی Vite + PWA + chunking
+├── eslint.config.js        # پیکربندی ESLint (flat config)
+├── .env.example            # نمونهٔ متغیرهای محیطی
+├── scripts/
+│   ├── dev-api.mjs         # سرور Mock API برای توسعه (احراز هویت/ذخیرهٔ محتوا)
+│   └── sync-data.mjs       # data.ts → public/data.js
+├── public/                 # دارایی‌های استاتیک + بک‌اند PHP
+│   ├── api.php             # API مدیریت: ورود، ذخیرهٔ محتوا، تغییر رمز (توکن X-Admin-Token)
+│   ├── rate_limit.php      # محدودسازی نرخ درخواست + throttle لاگین
+│   ├── admin-credentials-manager.php  # ابزار CLI مدیریت رمز ادمین (bcrypt)
+│   ├── data.js             # خروجی همگام‌شدهٔ data.ts
+│   └── icon-*.png, favicon.svg, .htaccess
+├── storage/                # خارج از ریشهٔ وب؛ رمز/توکن/محتوا (در .gitignore)
+└── src/
+    ├── main.tsx            # bootstrap React
+    ├── App.tsx             # کامپوننت ریشه و مسیریابی
+    ├── components/         # BookViewer, AdminPanel, CommandPalette, ...
+    ├── context/            # CatalogContext
+    ├── hooks/              # useFavorites, useReadingStreak, useCachedCatalogs, useFocusTrap, ...
+    ├── utils/              # helpers, analytics, tts
+    ├── constants/          # products, storageKeys, brand
+    └── types.ts
+```
+
+<div dir="rtl">
+
+---
+
+## 🚀 راه‌اندازی
+
+### پیش‌نیازها
+- Node.js نسخهٔ ۱۸ یا بالاتر
+- برای بک‌اند: PHP نسخهٔ ۸ یا بالاتر
+
+### نصب و اجرای محیط توسعه
+
+</div>
 
 ```bash
 npm install
-cp .env.example .env   # then edit values as needed
+cp .env.example .env   # سپس مقادیر را در صورت نیاز ویرایش کنید
+npm run dev            # اجرای هم‌زمان Mock API (:3001) و Vite (:5173)
 ```
 
-## Develop
+<div dir="rtl">
+
+رمز ادمینِ محیط توسعه از متغیر `DEV_ADMIN_PASSWORD` خوانده می‌شود؛ اگر تنظیم نشود مقدار `changeme-dev-only` استفاده می‌شود.
+
+### اسکریپت‌ها
+
+</div>
 
 ```bash
-npm run dev        # runs the mock API (:3001) and Vite (:5173) together
-npm run dev:api    # mock API only
+npm run dev        # اجرای هم‌زمان Mock API و Vite (cross-platform با concurrently)
+npm run dev:api    # فقط Mock API
+npm run typecheck  # بررسی نوع‌ها (tsc --noEmit)
+npm run lint       # اجرای ESLint
+npm run build      # ابتدا tsc --noEmit و سپس build تولیدی (بیلد روی خطای نوع شکست می‌خورد)
+npm run preview    # پیش‌نمایش بیلد تولیدی
+npm run sync-data  # همگام‌سازی data.ts → public/data.js
 ```
 
-The dev admin password comes from `DEV_ADMIN_PASSWORD` (see `.env.example`);
-if unset it falls back to `changeme-dev-only`.
+<div dir="rtl">
 
-## Quality gates
+---
+
+## 🔐 متغیرهای محیطی
+
+نمونهٔ کامل در `.env.example` آمده است. فایل `.env` **هرگز نباید commit شود** (در `.gitignore` است). متغیرهای فرانت‌اند با پیشوند `VITE_` هستند:
+
+</div>
 
 ```bash
-npm run typecheck  # tsc --noEmit
-npm run lint       # eslint .
-npm run build      # runs `tsc --noEmit` first, then `vite build`
+# فرانت‌اند (Vite)
+VITE_API_BASE_URL=.
+VITE_WP_BASE_URL=https://nafaspharmed.com
+
+# سرور توسعه (scripts/dev-api.mjs)
+DEV_ADMIN_PASSWORD=changeme-dev-only
 ```
 
-`build` fails on type errors by design.
+<div dir="rtl">
 
-## Admin provisioning (production / PHP backend)
+متغیرهای سمت سرور (PHP) باید در محیط وب‌سرور تنظیم شوند، نه در کد:
 
-The admin password is **never** stored in source or the client bundle. It exists
-only as a server-side bcrypt hash.
+| متغیر | کاربرد |
+|-------|--------|
+| `NAFAS_ADMIN_PASSWORD_HASH` | هش bcrypt رمز ادمین؛ تا قبل از تنظیم آن، API پاسخ `503 Admin not configured` می‌دهد |
+| `NAFAS_STORAGE_DIR` | مسیر مطلق محل ذخیرهٔ فایل‌های مخفی (خارج از ریشهٔ وب) |
+| `ALLOWED_ORIGINS` | فهرست دامنه‌های مجاز CORS (با کاما جدا شوند)، مثلاً `https://patient.nafaspharmed.com` |
 
-1. Generate a bcrypt hash:
+> اگر `ALLOWED_ORIGINS` تنظیم نشده باشد، به‌طور پیش‌فرض فقط `localhost:5173` و `localhost:3000` (محیط توسعه) مجاز هستند — هیچ‌گاه از `*` استفاده نمی‌شود.
 
-   ```bash
-   php -r "echo password_hash('your-strong-password', PASSWORD_BCRYPT), PHP_EOL;"
-   ```
+### تأمین (provision) رمز مدیر
 
-2. Provide it to the backend on first run via the `NAFAS_ADMIN_PASSWORD_HASH`
-   environment variable. Until it is set, the API responds `503 Admin not
-   configured` instead of creating a known-password account.
+رمز ادمین **هرگز** در سورس یا باندل کلاینت ذخیره نمی‌شود و فقط به‌صورت هش bcrypt سمت سرور وجود دارد.
 
-3. Rotate the password from the admin panel’s “تغییر رمز عبور” form (or the CLI
-   tool below). The previously committed default password is compromised and
-   must not be reused.
+۱) ساخت هش bcrypt:
 
-### Credential CLI (server, CLI-only)
+</div>
+
+```bash
+php -r "echo password_hash('your-strong-password', PASSWORD_BCRYPT), PHP_EOL;"
+```
+
+<div dir="rtl">
+
+۲) مقدار هش را در اولین اجرا از طریق متغیر `NAFAS_ADMIN_PASSWORD_HASH` به بک‌اند بدهید. تا وقتی تنظیم نشود، API به‌جای ساختِ حساب با رمزِ معلوم، پاسخ `503 Admin not configured` می‌دهد.
+
+۳) رمز را از بخش **تنظیمات ← تغییر رمز عبور** پنل مدیریت (یا ابزار CLI زیر) تغییر دهید. رمز پیش‌فرضِ قبلی در تاریخچهٔ git لو رفته و نباید دوباره استفاده شود.
+
+### ابزار CLI مدیریت رمز (فقط روی سرور)
+
+</div>
 
 ```bash
 php public/admin-credentials-manager.php set <new-password>
 php public/admin-credentials-manager.php show
-php public/admin-credentials-manager.php reset          # clears credentials
+php public/admin-credentials-manager.php reset          # پاک‌کردن credentials
 php public/admin-credentials-manager.php clear-tokens
 ```
 
-## Storage location (secrets outside the web root)
+<div dir="rtl">
 
-Credentials, session tokens, and saved content live under a `storage/`
-directory **outside** `public/` (the web root), so they are never served:
+---
 
-- `storage/.admin-credentials.json`
-- `storage/.admin-tokens.json`
-- `storage/data/content.json`
+## 🔄 جریان داده
 
-Override the location with `NAFAS_STORAGE_DIR` (absolute path). `storage/` is
-gitignored. The dev mock API (`scripts/dev-api.mjs`) uses the same layout.
+دادهٔ پیش‌فرض در `data.ts` نگه‌داری می‌شود. با اجرای `npm run sync-data` به `public/data.js` کپی می‌شود و `index.html` آن را قبل از اجرای React بارگذاری می‌کند. در محیط تولید، پنل مدیریت محتوا را از طریق `api.php` ذخیره می‌کند (در `storage/data/content.json`، خارج از ریشهٔ وب) و اپ نسخهٔ سروری را روی دادهٔ پیش‌فرض اولویت می‌دهد.
 
-## CORS
+---
 
-Set `ALLOWED_ORIGINS` (comma-separated) on the PHP host to the portal’s
-origin(s). The API never uses `*`.
+## 🛡️ نکات امنیتی استقرار
 
-## Environment variables
+- فایل‌های مخفی/حالت بک‌اند (`.admin-credentials.json`، `.admin-tokens.json` و `data/content.json`) زیر پوشهٔ **`storage/` خارج از ریشهٔ وب** ذخیره می‌شوند و هرگز سرو نمی‌شوند؛ این پوشه در `.gitignore` است. محل آن را با `NAFAS_STORAGE_DIR` می‌توان تغییر داد.
+- رمز ادمین با **bcrypt** هش می‌شود و توکن نشست با `random_bytes` ساخته و با `hash_equals` مقایسه می‌شود. اعتبارسنجی توکن روی هر درخواست، دیگر فایل توکن را بازنویسی نمی‌کند.
+- لاگین مدیر در برابر brute-force محافظت می‌شود (حداکثر ۱۰ تلاش ناموفق در ۱۵ دقیقه برای هر IP). نرخ‌محدودیِ عمومی فقط روی درخواست‌های POST اعمال می‌شود، نه روی GETِ عمومی محتوا.
+- آدرس‌ها (کاور، PDF و صفحات) هم سمت سرور و هم سمت کلاینت اعتبارسنجی می‌شوند و تنها `http(s)`/`data` پذیرفته می‌شود.
+- CORS در همهٔ endpointهای PHP به `ALLOWED_ORIGINS` محدود است (بدون `*`). CSP اسکریپت‌های inline را مجاز نمی‌داند و هدر HSTS تنظیم شده است.
 
-See `.env.example`. Frontend vars are prefixed `VITE_`; backend vars
-(`NAFAS_ADMIN_PASSWORD_HASH`, `NAFAS_STORAGE_DIR`, `ALLOWED_ORIGINS`) are set in
-the server environment, not committed.
+---
+
+## 📦 استقرار
+
+پس از `npm run build`، محتویات پوشهٔ `dist/` را روی هاست استاتیک قرار دهید و فایل‌های PHP داخل `public/` را روی یک سرور PHP منتشر کنید. پوشهٔ `storage/` را خارج از ریشهٔ وب بسازید و `NAFAS_ADMIN_PASSWORD_HASH` را تنظیم کنید. فایل `.htaccess` برای مسیریابی SPA و هدرهای امنیتی موجود است.
+
+---
+
+> شرکت نفس زیست فارمد — تمامی حقوق محفوظ است.
+
+</div>
