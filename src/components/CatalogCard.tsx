@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { Catalog } from '../types';
 import SafeImage from './SafeImage';
 import { speakText, stopSpeaking } from '../utils/tts';
-import { highlightText } from '../utils/helpers';
+import { highlightText, isSafeHttpUrl } from '../utils/helpers';
 import { useCachedCatalogs } from '../hooks/useCachedCatalogs';
 import QrModal from './QrModal';
 
@@ -39,7 +39,7 @@ const ActionPopover: React.FC<{
   }, [onClose]);
 
   const handleDownloadPdf = () => {
-    if (catalog.pdfUrl) {
+    if (catalog.pdfUrl && isSafeHttpUrl(catalog.pdfUrl)) {
       const a = document.createElement('a');
       a.href = catalog.pdfUrl;
       a.target = '_blank';
@@ -47,9 +47,11 @@ const ActionPopover: React.FC<{
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    } else if (catalog.pages[0]) {
+    } else if (catalog.pages[0] && isSafeHttpUrl(catalog.pages[0], true)) {
       // Fix 1.2: open in new tab for cross-origin resources
       window.open(catalog.pages[0], '_blank', 'noopener,noreferrer');
+    } else {
+      toast.error('آدرس نامعتبر است.');
     }
     onClose();
   };

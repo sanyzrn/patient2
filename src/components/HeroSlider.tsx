@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCatalogs } from '../context/CatalogContext';
 import SafeImage from './SafeImage';
+import { isSafeHttpUrl } from '../utils/helpers';
 
 // Animated mesh SVG background for text banners
 const MeshBackground: React.FC = () => (
@@ -123,7 +124,7 @@ const HeroSlider: React.FC = () => {
                     <p className="text-skin-muted text-base md:text-lg max-w-2xl mx-auto md:mx-0 leading-relaxed">
                       {banner.description}
                     </p>
-                    {banner.link && (
+                    {banner.link && isSafeHttpUrl(banner.link) && (
                       <a
                         href={banner.link}
                         target="_blank"
@@ -151,7 +152,7 @@ const HeroSlider: React.FC = () => {
                 </div>
               ) : (
                 <div className="absolute inset-0 w-full h-full">
-                  {banner.link ? (
+                  {banner.link && isSafeHttpUrl(banner.link) ? (
                     <a href={banner.link} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
                       <picture>
                         {banner.mobileImageUrl && (

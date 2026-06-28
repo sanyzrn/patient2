@@ -47,3 +47,15 @@ export function highlightText(text: string, query: string): React.ReactNode {
     ))
   );
 }
+
+/** Returns true only for http(s) (and optionally data:) URLs. */
+export function isSafeHttpUrl(input: string, allowData = false): boolean {
+  try {
+    const u = new URL(input, window.location.href);
+    if (u.protocol === 'http:' || u.protocol === 'https:') return true;
+    if (allowData && u.protocol === 'data:') return true;
+    return false;
+  } catch {
+    return false;
+  }
+}

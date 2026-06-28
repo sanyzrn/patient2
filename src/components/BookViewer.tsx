@@ -12,6 +12,7 @@ import {
 import SafeImage from './SafeImage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import { trackCatalogView } from '../utils/analytics';
+import { isSafeHttpUrl } from '../utils/helpers';
 
 interface BookViewerProps {
   catalog: Catalog;
@@ -330,14 +331,16 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
   };
 
   const handleDownload = () => {
-    const link = document.createElement('a');
-    if (catalog.pdfUrl) {
+    if (catalog.pdfUrl && isSafeHttpUrl(catalog.pdfUrl)) {
+      const link = document.createElement('a');
       link.href = catalog.pdfUrl;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    } else if (catalog.pages[0]) {
+    } else if (catalog.pages[0] && isSafeHttpUrl(catalog.pages[0], true)) {
       window.open(catalog.pages[0], '_blank', 'noopener,noreferrer');
+    } else {
+      toast.error('آدرس نامعتبر است.');
     }
   };
 
