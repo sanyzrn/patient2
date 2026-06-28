@@ -23,8 +23,6 @@ const PRODUCT_ICONS: Record<string, LucideIcon> = {
 const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatalog, sectionRef }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, scrollLeft: 0 });
 
   // RTL-safe active-slide tracking: pick the card whose centre is closest
   // to the scroller's centre (only relevant while the carousel is active).
@@ -49,26 +47,6 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
     (el.children[i] as HTMLElement | undefined)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   };
 
-  // Mouse drag functionality for desktop carousel
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    setIsDragging(true);
-    setDragStart({ x: e.clientX, scrollLeft: el.scrollLeft });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    const el = scrollerRef.current;
-    if (!el) return;
-    const walk = (e.clientX - dragStart.x) * 1.5;
-    el.scrollLeft = dragStart.scrollLeft - walk;
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
   return (
     <section ref={sectionRef} id="products" className="mb-12 scroll-mt-24">
       {/* Header */}
@@ -86,15 +64,11 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
         <p className="text-sm text-skin-muted mt-3">طیفی از فرآورده‌های دارویی، مکمل‌های تخصصی و تجهیزات پزشکی نوآورانه</p>
       </div>
 
-      {/* Carousel: responsive on mobile, drag-enabled on desktop */}
+      {/* Mobile carousel (one product per slide) · Desktop: all five in one row */}
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className={`flex gap-3 items-stretch overflow-x-auto lg:overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} lg:cursor-grab lg:active:cursor-grabbing select-none`}
+        className="flex lg:grid lg:grid-cols-5 gap-3 items-stretch overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0"
       >
         {PRODUCTS.map((product) => {
           const matchingCatalog = catalogs.find(c =>
@@ -105,7 +79,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
           return (
             <article
               key={product.id}
-              className="snap-center shrink-0 w-[80%] xs:w-[64%] sm:w-[46%] lg:w-1/3 bg-skin-card border border-skin-border rounded-2xl overflow-hidden flex flex-col hover:border-skin-primary/30 hover:shadow-[0_14px_40px_rgba(0,0,0,0.09)] lg:hover:-translate-y-1 transition-all pointer-events-auto"
+              className="snap-center shrink-0 w-[80%] xs:w-[64%] sm:w-[46%] lg:w-auto bg-skin-card border border-skin-border rounded-2xl overflow-hidden flex flex-col hover:border-skin-primary/30 hover:shadow-[0_14px_40px_rgba(0,0,0,0.09)] lg:hover:-translate-y-1 transition-all"
             >
               {/* Square image — fills the card edge-to-edge (no white framing) */}
               <div className="relative aspect-square bg-white overflow-hidden">
