@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   BookMarked, BookOpen, ExternalLink, Wind, ThermometerSnowflake, Baby, Flower2, Stethoscope, type LucideIcon
 } from 'lucide-react';
@@ -23,6 +23,7 @@ const PRODUCT_ICONS: Record<string, LucideIcon> = {
 const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatalog, sectionRef }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const [grabbing, setGrabbing] = useState(false);
 
   // RTL-safe active-slide tracking: pick the card whose centre is closest
   // to the scroller's centre (only relevant while the carousel is active).
@@ -47,6 +48,83 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
     (el.children[i] as HTMLElement | undefined)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   };
 
+  // ── Smooth drag-to-scroll with inertia/momentum (desktop pointer only) ──────
+  const drag = useRef({ down: false, moved: false, startX: 0, startScroll: 0, lastX: 0, lastT: 0, velocity: 0 });
+  const rafRef = useRef<number | null>(null);
+
+  const stopMomentum = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
+  const onDocMove = useCallback((e: MouseEvent) => {
+    const el = scrollerRef.current;
+    if (!el || !drag.current.down) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 4) drag.current.moved = true;
+    el.scrollLeft = drag.current.startScroll - dx;
+    const now = performance.now();
+    const dt = now - drag.current.lastT || 16;
+    // Smoothed velocity in px/ms for a natural feel after release.
+    drag.current.velocity = (e.clientX - drag.current.lastX) / dt;
+    drag.current.lastX = e.clientX;
+    drag.current.lastT = now;
+  }, []);
+
+  const endDrag = useCallback(() => {
+    document.removeEventListener('mousemove', onDocMove);
+    document.removeEventListener('mouseup', endDrag);
+    if (!drag.current.down) return;
+    drag.current.down = false;
+    setGrabbing(false);
+    const el = scrollerRef.current;
+    if (!el) return;
+    // Glide with decaying velocity for a soft, polished stop.
+    let v = drag.current.velocity * 16;
+    const step = () => {
+      v *= 0.94;
+      if (Math.abs(v) < 0.4) { rafRef.current = null; return; }
+      el.scrollLeft -= v;
+      rafRef.current = requestAnimationFrame(step);
+    };
+    if (Math.abs(v) > 0.4) rafRef.current = requestAnimationFrame(step);
+  }, [onDocMove]);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    const el = scrollerRef.current;
+    if (!el) return;
+    e.preventDefault(); // stop native image-drag ghost + text selection
+    stopMomentum();
+    drag.current.down = true;
+    drag.current.moved = false;
+    drag.current.startX = e.clientX;
+    drag.current.startScroll = el.scrollLeft;
+    drag.current.lastX = e.clientX;
+    drag.current.lastT = performance.now();
+    drag.current.velocity = 0;
+    setGrabbing(true);
+    document.addEventListener('mousemove', onDocMove);
+    document.addEventListener('mouseup', endDrag);
+  }, [onDocMove, endDrag, stopMomentum]);
+
+  // Swallow the click that follows a real drag so cards/links don't fire.
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (drag.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current.moved = false;
+    }
+  };
+
+  useEffect(() => () => {
+    stopMomentum();
+    document.removeEventListener('mousemove', onDocMove);
+    document.removeEventListener('mouseup', endDrag);
+  }, [onDocMove, endDrag, stopMomentum]);
+
   return (
     <section ref={sectionRef} id="products" className="mb-12 scroll-mt-24">
       {/* Header */}
@@ -64,11 +142,13 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
         <p className="text-sm text-skin-muted mt-3">طیفی از فرآورده‌های دارویی، مکمل‌های تخصصی و تجهیزات پزشکی نوآورانه</p>
       </div>
 
-      {/* Mobile carousel (one product per slide) · Desktop: all five in one row */}
+      {/* Mobile: one-per-slide snap carousel · Desktop: drag slider (3.5 cards peek) */}
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
-        className="flex lg:grid lg:grid-cols-5 gap-3 items-stretch overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0"
+        onMouseDown={onMouseDown}
+        onClickCapture={onClickCapture}
+        className={`flex gap-3 items-stretch overflow-x-auto snap-x snap-mandatory lg:snap-none scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0 lg:cursor-grab ${grabbing ? 'lg:cursor-grabbing' : ''}`}
       >
         {PRODUCTS.map((product) => {
           const matchingCatalog = catalogs.find(c =>
@@ -79,7 +159,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
           return (
             <article
               key={product.id}
-              className="snap-center shrink-0 w-[80%] xs:w-[64%] sm:w-[46%] lg:w-auto bg-skin-card border border-skin-border rounded-2xl overflow-hidden flex flex-col hover:border-skin-primary/30 hover:shadow-[0_14px_40px_rgba(0,0,0,0.09)] lg:hover:-translate-y-1 transition-all"
+              className="snap-center shrink-0 w-[80%] xs:w-[64%] sm:w-[46%] lg:w-[28%] bg-skin-card border border-skin-border rounded-2xl overflow-hidden flex flex-col hover:border-skin-primary/30 hover:shadow-[0_14px_40px_rgba(0,0,0,0.09)] lg:hover:-translate-y-1 transition-all"
             >
               {/* Square image — fills the card edge-to-edge (no white framing) */}
               <div className="relative aspect-square bg-white overflow-hidden">
@@ -88,6 +168,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
                   alt={product.name}
                   loading="lazy"
                   decoding="async"
+                  draggable={false}
                   className="w-full h-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
                 />
