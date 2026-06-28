@@ -124,7 +124,7 @@ const StatsBar: React.FC<{ catalogCount: number; videoCount: number }> = ({ cata
 
   return (
     <div ref={ref} className="bg-skin-card border-y border-skin-border mb-8">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-center gap-6 md:gap-10 flex-wrap">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 py-3 flex items-center justify-center gap-6 md:gap-10 flex-wrap">
         <div className="flex items-center gap-2 text-skin-muted text-sm">
           <BookOpen size={15} className="text-skin-primary" />
           <span className="font-bold text-skin-text tabular-nums">{catCount}</span>
@@ -293,7 +293,7 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
     <footer className="bg-skin-card border-t border-skin-border mt-16">
       {/* Gradient top line */}
       <div className="h-px w-full" style={{ background: 'linear-gradient(to right, transparent, var(--color-primary) 30%, var(--color-primary) 70%, transparent)' }} />
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-10">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           {/* Logo + company */}
           <div className="flex flex-col items-center md:items-start gap-3">
@@ -816,7 +816,7 @@ const InnerApp: React.FC = () => {
             : 'bg-skin-base/95 backdrop-blur-sm'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 h-16 flex items-center gap-3">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 h-16 flex items-center gap-3">
           {/* Logo */}
           <button
             onClick={() => setLogoClicks(c => c + 1)}
@@ -897,7 +897,7 @@ const InnerApp: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="max-w-7xl mx-auto px-3 sm:px-4 mt-3"
+            className="max-w-[1600px] mx-auto px-3 sm:px-4 mt-3"
           >
             <div className="flex items-center justify-between gap-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 rounded-xl px-4 py-3 text-sm">
               <p>کاتالوگ مورد نظر یافت نشد. می‌توانید با جستجو آن را پیدا کنید.</p>
@@ -908,7 +908,7 @@ const InnerApp: React.FC = () => {
       </AnimatePresence>
 
       {/* ─── MAIN CONTENT ─────────────────────────────────────────────────── */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6">
+      <main className="max-w-[1600px] mx-auto px-3 sm:px-4 py-6">
         {/* BUG-N02: Real loading state and error display */}
         {error && !isLoading && (
           <div className="mb-4">
@@ -1034,7 +1034,7 @@ const InnerApp: React.FC = () => {
 
           {/* Grid/List */}
           {isLoading ? (
-            <div className={displayMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4' : 'flex flex-col gap-3'}>
+            <div className={displayMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4' : 'flex flex-col gap-3'}>
               {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} viewMode={displayMode} />)}
             </div>
           ) : processedCatalogs.length === 0 ? (
@@ -1047,7 +1047,7 @@ const InnerApp: React.FC = () => {
               />
             </div>
           ) : (
-            <div className={displayMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4' : 'flex flex-col gap-3'}>
+            <div className={displayMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4' : 'flex flex-col gap-3'}>
               {processedCatalogs.map((catalog, index) => (
                 <CatalogCard
                   key={catalog.id}
@@ -1181,7 +1181,7 @@ const InnerApp: React.FC = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-24 right-5 md:right-6 z-30"
+            className="fixed bottom-5 right-4 md:bottom-6 md:right-6 z-30"
           >
             <ScrollToTop scrollProgress={scrollProgress} />
           </motion.div>
