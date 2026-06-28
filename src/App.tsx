@@ -454,7 +454,7 @@ const InnerApp: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   // Fix 10: Mobile nav active section tracking
-  const [activeSection, setActiveSection] = useState<'catalogs' | 'products' | 'videos'>('catalogs');
+  const [activeSection, setActiveSection] = useState<'catalogs' | 'products' | 'videos' | null>('catalogs');
   const catalogsSectionRef = useRef<HTMLElement>(null);
   const productsSectionRef = useRef<HTMLElement>(null);
   const videosSectionRef = useRef<HTMLElement>(null);
@@ -494,6 +494,10 @@ const InnerApp: React.FC = () => {
         const el = ref.current;
         if (el && el.getBoundingClientRect().top <= line) current = id;
       }
+      // Once the last section (products) has fully scrolled above the line —
+      // i.e. we're down in the footer — clear the highlight entirely.
+      const products = productsSectionRef.current;
+      if (products && products.getBoundingClientRect().bottom <= line) current = null;
       setActiveSection(current);
     };
     onScrollSpy();
