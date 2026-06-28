@@ -570,23 +570,11 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
           <p className="text-xs text-skin-muted line-clamp-2 mb-3">{catalog.description}</p>
           
           {/* Meta */}
-          <div className="flex items-center gap-2 text-xs text-skin-muted mb-3">
+          <div className="flex items-center gap-2 text-xs text-skin-muted">
             <span>{catalog.pageCount} صفحه</span>
             <span>·</span>
             <span>{catalog.language === 'en' ? '🇬🇧' : '🇮🇷'}</span>
           </div>
-          
-          {/* Open button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick(catalog);
-              setShowPreview(false);
-            }}
-            className="w-full bg-skin-primary hover:bg-skin-primary-hover text-white text-xs py-2 rounded-xl font-bold transition-colors"
-          >
-            باز کردن
-          </button>
         </div>
       </motion.div>,
       document.body

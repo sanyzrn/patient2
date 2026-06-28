@@ -10,6 +10,7 @@ import { STORAGE_KEYS } from '../constants/storageKeys';
 export interface AnalyticsData {
   viewsByCatalog: Record<string, number>;
   daily: Record<string, number>;
+  timeByCatalogPage?: Record<string, Record<number, number>>;
 }
 
 /**
@@ -34,6 +35,26 @@ export function trackCatalogView(catalogId: string, _catalogTitle: string): void
     localStorage.setItem(key, JSON.stringify(data));
   } catch {
     // Silently fail - don't break user experience
+  }
+}
+
+/**
+ * Records cumulative reading time (seconds) for a catalog page.
+ * Single coherent analytics object — does not touch view counts.
+ */
+export function trackPageTime(catalogId: string, page: number, seconds: number): void {
+  if (seconds <= 0) return;
+  try {
+    const key = STORAGE_KEYS.ANALYTICS;
+    const existing = localStorage.getItem(key);
+    const data: AnalyticsData = existing ? JSON.parse(existing) : { viewsByCatalog: {}, daily: {} };
+    data.timeByCatalogPage = data.timeByCatalogPage ?? {};
+    data.timeByCatalogPage[catalogId] = data.timeByCatalogPage[catalogId] ?? {};
+    const prev = data.timeByCatalogPage[catalogId][page] ?? 0;
+    data.timeByCatalogPage[catalogId][page] = prev + seconds;
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // ignore storage errors
   }
 }
 

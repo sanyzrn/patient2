@@ -166,9 +166,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
     // For a product chat, surface the quick-reply prompts as suggestions.
     const isProduct = !!p && p.id !== 'nafas';
     const copy = [...messages];
-    // Remove suggestions from last message if any
-    if (copy.length > 0) copy[copy.length - 1].suggestions = undefined;
-    
+    // Remove suggestions from last message if any (immutably — it is in state)
+    if (copy.length > 0) {
+      copy[copy.length - 1] = { ...copy[copy.length - 1]!, suggestions: undefined };
+    }
+
     setMessages([
       ...copy,
       {
@@ -195,7 +197,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
     const addPromptWithSuggestions = (content: string, prefix: string) => {
       setMessages(prev => {
         const copy = [...prev];
-        if (copy.length > 0) copy[copy.length - 1].suggestions = undefined;
+        if (copy.length > 0) {
+          copy[copy.length - 1] = { ...copy[copy.length - 1]!, suggestions: undefined };
+        }
         return [...copy, { id: uid(), role: 'user', content: trimmed }, {
           id: uid(), role: 'assistant', content,
           suggestions: PRODUCTS.map(p => `${prefix} ${p.name}`),
@@ -237,7 +241,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
     // clear suggestions from previous message
     setMessages(prev => {
       const copy = [...prev];
-      if (copy.length > 0) copy[copy.length - 1].suggestions = undefined;
+      if (copy.length > 0) {
+        copy[copy.length - 1] = { ...copy[copy.length - 1]!, suggestions: undefined };
+      }
       return [...copy, userMsg];
     });
     setInput('');

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import SafeImage from './SafeImage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
-import { trackCatalogView } from '../utils/analytics';
+import { trackCatalogView, trackPageTime } from '../utils/analytics';
 import { isSafeHttpUrl } from '../utils/helpers';
 
 interface BookViewerProps {
@@ -275,28 +275,12 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
     localStorage.setItem(`nafas_progress_${catalog.id}`, String(e.data));
   }, [playSound, catalog.id]);
 
-  // Analytics: view count
-  useEffect(() => {
-    const statsStr = localStorage.getItem('nafas_analytics');
-    const stats = statsStr ? JSON.parse(statsStr) : { viewsByCatalog: {}, timeByCatalogPage: {} };
-    stats.viewsByCatalog[catalog.id] = (stats.viewsByCatalog[catalog.id] || 0) + 1;
-    localStorage.setItem('nafas_analytics', JSON.stringify(stats));
-  }, [catalog.id]);
-
-  // Analytics: time per page
+  // Analytics: time per page (view count is handled once by trackCatalogView above).
   useEffect(() => {
     const startTime = Date.now();
     return () => {
       const duration = Math.floor((Date.now() - startTime) / 1000);
-      if (duration > 0) {
-        const statsStr = localStorage.getItem('nafas_analytics');
-        const stats = statsStr ? JSON.parse(statsStr) : { viewsByCatalog: {}, timeByCatalogPage: {} };
-        if (!stats.timeByCatalogPage) stats.timeByCatalogPage = {};
-        if (!stats.timeByCatalogPage[catalog.id]) stats.timeByCatalogPage[catalog.id] = {};
-        const currentDur = stats.timeByCatalogPage[catalog.id][currentPage] || 0;
-        stats.timeByCatalogPage[catalog.id][currentPage] = currentDur + duration;
-        localStorage.setItem('nafas_analytics', JSON.stringify(stats));
-      }
+      trackPageTime(catalog.id, currentPage, duration);
     };
   }, [currentPage, catalog.id]);
 

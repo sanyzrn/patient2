@@ -32,7 +32,7 @@ import { dateToNumber, highlightText } from './utils/helpers';
 import { useCountUp } from './hooks/useCountUp';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useFavorites } from './hooks/useFavorites';
-import { useReadingStreak } from './hooks/useReadingStreak';
+import { useReadingStreak, checkStreakMilestone } from './hooks/useReadingStreak';
 import { LOGO_URL, LOGO_URL_DARK, DBS_LOGO_URL, DBS_URL, APP_VERSION } from './constants/brand';
 
 // ARCH-03: Lazy load heavy components
@@ -427,7 +427,7 @@ const InnerApp: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const isOnline = useOnlineStatus();
   const { favorites, toggleFavorite, isFavorite, clearAll: clearFavorites } = useFavorites();
-  const { recordRead } = useReadingStreak();
+  const { recordRead, streak } = useReadingStreak();
   const [chatOpen, setChatOpen] = useState(false);
 
   // UI state
@@ -618,8 +618,10 @@ const InnerApp: React.FC = () => {
     setOpenCatalogPage(page);
     addRecent(catalog.id);
     recordRead(); // SURPRISE-03: Track reading streak
+    const milestone = checkStreakMilestone(streak);
+    if (milestone) toast.success(milestone);
     window.history.pushState({}, '', `${window.location.pathname}?cat=${catalog.id}&page=${page + 1}`);
-  }, [addRecent, recordRead]);
+  }, [addRecent, recordRead, streak]);
 
   const handleCloseViewer = useCallback(() => {
     setOpenCatalog(null);
