@@ -369,10 +369,10 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
     endGesture(e.changedTouches[0]!.clientX, e.changedTouches[0]!.clientY);
   };
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Only pan with the mouse when zoomed in; let the flipbook handle clicks otherwise.
-    if (e.button !== 0 || zoomLevel <= 1) return;
+    if (e.button !== 0) return;
     e.preventDefault();
-    startGesture(e.clientX, e.clientY, 'pan');
+    // Zoomed in → drag pans the page; at 1× → drag is a swipe that flips on release.
+    startGesture(e.clientX, e.clientY, zoomLevel > 1 ? 'pan' : 'swipe');
   };
   const handleMouseMove = (e: React.MouseEvent) => {
     if (gesture.current.mode !== 'none') { e.preventDefault(); moveGesture(e.clientX, e.clientY); }
@@ -524,7 +524,10 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
               showCover={false}
               mobileScrollSupport={false}
               clickEventForward={true}
-              useMouseEvents={!canPan}
+              /* All input is driven by our own gesture layer (pinch/pan/swipe)
+                 so the library never competes with zoom. Flips happen via
+                 flipNext()/flipPrev()/flip(). */
+              useMouseEvents={false}
               swipeDistance={0}
               showPageCorners={false}
               onInit={onInit}
