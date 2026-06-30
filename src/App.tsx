@@ -107,7 +107,7 @@ const SectionHeader: React.FC<{
 };
 
 // ─── Stats Bar ────────────────────────────────────────────────────────────────
-const StatsBar: React.FC<{ catalogCount: number; videoCount: number }> = ({ catalogCount, videoCount }) => {
+const StatsBar: React.FC<{ catalogCount: number; videoCount: number; activeLangs: string[] }> = ({ catalogCount, videoCount, activeLangs }) => {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -121,6 +121,8 @@ const StatsBar: React.FC<{ catalogCount: number; videoCount: number }> = ({ cata
 
   const catCount = useCountUp(visible ? catalogCount : 0, 800);
   const vidCount = useCountUp(visible ? videoCount : 0, 800);
+
+  const langFlags = LANG_OPTIONS.filter(l => activeLangs.includes(l.code));
 
   return (
     <div ref={ref} className="bg-skin-card border-y border-skin-border mb-8">
@@ -136,11 +138,17 @@ const StatsBar: React.FC<{ catalogCount: number; videoCount: number }> = ({ cata
           <span className="font-bold text-skin-text tabular-nums">{vidCount}</span>
           <span>ویدئوی آموزشی</span>
         </div>
-        <div className="w-px h-4 bg-skin-border hidden sm:block" />
-        <div className="flex items-center gap-2 text-skin-muted text-sm">
-          <Languages size={15} className="text-skin-primary" />
-          <span className="font-bold text-skin-text">FA / EN</span>
-        </div>
+        {langFlags.length > 0 && (
+          <>
+            <div className="w-px h-4 bg-skin-border hidden sm:block" />
+            <div className="flex items-center gap-1.5 text-skin-muted text-sm">
+              <Languages size={15} className="text-skin-primary" />
+              {langFlags.map(l => (
+                <span key={l.code} title={l.label} className="text-base leading-none">{l.flag}</span>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -392,6 +400,13 @@ const SORT_OPTIONS = [
   { value: 'alpha', label: 'الفبایی' },
 ];
 
+const LANG_OPTIONS = [
+  { code: 'fa', flag: '🇮🇷', label: 'فارسی', ariaLabel: 'فیلتر فارسی' },
+  { code: 'en', flag: '🇬🇧', label: 'English', ariaLabel: 'فیلتر انگلیسی' },
+  { code: 'ar', flag: '🇸🇦', label: 'العربية', ariaLabel: 'فیلتر عربی' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский', ariaLabel: 'فیلتر روسی' },
+] as const;
+
 function useRecentCatalogs() {
   const [recent, setRecent] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem('nafas_recent') ?? '[]'); } catch { return []; }
@@ -434,7 +449,7 @@ const InnerApp: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('default');
   const [displayMode, setDisplayMode] = useState<'grid' | 'list'>('grid');
-  const [langFilter, setLangFilter] = useState<'fa' | 'en' | null>(null);
+  const [langFilter, setLangFilter] = useState<'fa' | 'en' | 'ar' | 'ru' | null>(null);
   const [videoSearch, setVideoSearch] = useState('');
 
   // Modal state
@@ -660,6 +675,12 @@ const InnerApp: React.FC = () => {
     return counts;
   }, [catalogs]);
 
+  // Languages present in catalog data (for StatsBar flags and filter buttons)
+  const availableLangs = useMemo(() => {
+    const langs = new Set(catalogs.map(c => c.language ?? 'fa'));
+    return Array.from(langs) as ('fa' | 'en' | 'ar' | 'ru')[];
+  }, [catalogs]);
+
   // Processed catalogs
   // SURPRISE-05: Fuzzy search with Fuse.js
   const fuse = useMemo(() => new Fuse(catalogs, {
@@ -713,13 +734,20 @@ const InnerApp: React.FC = () => {
   }, [favorites, catalogs]);
 
   const filteredVideos = useMemo(() => {
+    let result = [...videos];
+    // Filter by selected language: videos without a language tag default to 'fa'
+    if (langFilter) {
+      result = result.filter(v => (v.language ?? 'fa') === langFilter);
+    }
     const query = videoSearch.trim().toLowerCase();
-    if (!query) return videos;
-    return videos.filter(v =>
-      v.title.toLowerCase().includes(query) ||
-      v.description.toLowerCase().includes(query)
-    );
-  }, [videos, videoSearch]);
+    if (query) {
+      result = result.filter(v =>
+        v.title.toLowerCase().includes(query) ||
+        v.description.toLowerCase().includes(query)
+      );
+    }
+    return result;
+  }, [videos, videoSearch, langFilter]);
 
   const showFavoritesRow = favoriteCatalogs.length > 0 && !searchTerm && !selectedCategory;
 
@@ -928,7 +956,7 @@ const InnerApp: React.FC = () => {
         <HeroSlider />
 
         {/* Stats Bar */}
-        <StatsBar catalogCount={catalogs.length} videoCount={videos.length} />
+        <StatsBar catalogCount={catalogs.length} videoCount={videos.length} activeLangs={availableLangs} />
 
         {/* Recently Viewed */}
         {showRecentRow && (
@@ -984,26 +1012,21 @@ const InnerApp: React.FC = () => {
                 </div>
               </div>
 
-              {/* Fix 3.2: Language quick filter */}
+              {/* Language quick filter — shows all 4 supported languages */}
               <div className="flex gap-1 shrink-0">
-                <button
-                  onClick={() => setLangFilter(langFilter === 'fa' ? null : 'fa')}
-                  title="فیلتر فارسی"
-                  aria-label="فیلتر فارسی"
-                  aria-pressed={langFilter === 'fa'}
-                  className={`h-8 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === 'fa' ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
-                >
-                  <span aria-hidden>🇮🇷</span> FA
-                </button>
-                <button
-                  onClick={() => setLangFilter(langFilter === 'en' ? null : 'en')}
-                  title="فیلتر انگلیسی"
-                  aria-label="فیلتر انگلیسی"
-                  aria-pressed={langFilter === 'en'}
-                  className={`h-8 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === 'en' ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
-                >
-                  <span aria-hidden>🇬🇧</span> EN
-                </button>
+                {LANG_OPTIONS.map(({ code, flag, ariaLabel }) => (
+                  <button
+                    key={code}
+                    onClick={() => setLangFilter(langFilter === code ? null : code)}
+                    title={ariaLabel}
+                    aria-label={ariaLabel}
+                    aria-pressed={langFilter === code}
+                    className={`h-8 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === code ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
+                  >
+                    <span aria-hidden>{flag}</span>
+                    <span className="hidden sm:inline">{code.toUpperCase()}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1108,7 +1131,11 @@ const InnerApp: React.FC = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center px-4">
                   <Video size={40} className="text-skin-border mb-3 opacity-50" />
-                  <p className="text-skin-muted text-sm">ویدئویی با این معیار یافت نشد</p>
+                  <p className="text-skin-muted text-sm">
+                    {langFilter && !videoSearch
+                      ? `ویدئویی به این زبان موجود نیست`
+                      : 'ویدئویی با این معیار یافت نشد'}
+                  </p>
                 </div>
               )}
             </section>

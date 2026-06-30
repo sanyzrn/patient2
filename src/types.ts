@@ -1,3 +1,5 @@
+export type SupportedLang = 'fa' | 'en' | 'ar' | 'ru';
+
 export interface Catalog {
   id: string;
   title: string;
@@ -8,7 +10,7 @@ export interface Catalog {
   date: string;
   pageCount: number;
   category: string;
-  language?: 'fa' | 'en';
+  language?: SupportedLang;
   toc?: { title: string; page: number }[];
 }
 
@@ -20,6 +22,7 @@ export interface Video {
   videoUrl: string;
   date: string;
   duration?: string;
+  language?: SupportedLang;
 }
 
 export interface ViewerSettings {
