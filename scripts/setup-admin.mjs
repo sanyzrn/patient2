@@ -15,7 +15,6 @@ import { stdin as input, stdout as output } from 'node:process';
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import bcrypt from 'bcryptjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const STORAGE_DIR = resolve(__dirname, '..', 'storage');
@@ -64,7 +63,27 @@ async function getPassword() {
   return password;
 }
 
+async function loadBcrypt() {
+  try {
+    const mod = await import('bcryptjs');
+    return mod.default ?? mod;
+  } catch {
+    const RED = '\x1b[31m'; const BOLD = '\x1b[1m'; const RESET = '\x1b[0m';
+    console.error('');
+    console.error(`${RED}  خطا: پکیج bcryptjs پیدا نشد.${RESET}`);
+    console.error('');
+    console.error(`  ابتدا dependencies را نصب کن:`);
+    console.error(`  ${BOLD}npm install${RESET}`);
+    console.error('');
+    console.error(`  سپس دوباره اجرا کن:`);
+    console.error(`  ${BOLD}npm run setup${RESET}`);
+    console.error('');
+    process.exit(1);
+  }
+}
+
 async function main() {
+  const bcrypt = await loadBcrypt();
   const password = await getPassword();
 
   console.log(`\n  ${YELLOW}در حال هش‌کردن رمز...${RESET}`);
