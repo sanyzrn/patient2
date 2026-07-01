@@ -1,8 +1,9 @@
 // Fix 1.9: ErrorBoundary with self-reset capability
 import React, { ReactNode, ErrorInfo } from 'react';
 import { AlertTriangle, RefreshCw, RotateCcw } from 'lucide-react';
+import { withTranslation, WithTranslation } from 'react-i18next';
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode;
   fallback?: ReactNode;
 }
@@ -29,6 +30,7 @@ class ErrorBoundary extends React.Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const { t } = this.props;
       return (
         this.props.fallback || (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-skin-overlay backdrop-blur-md">
@@ -38,9 +40,9 @@ class ErrorBoundary extends React.Component<Props, State> {
                   <AlertTriangle size={32} />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-skin-text mb-2">مشکلی پیش آمد</h2>
+              <h2 className="text-xl font-bold text-skin-text mb-2">{t('errorBoundary.title')}</h2>
               <p className="text-skin-muted text-sm mb-6">
-                متأسفانه یک خطای غیرمنتظره رخ داد. می‌توانید دوباره تلاش کنید یا صفحه را بارگذاری مجدد کنید.
+                {t('errorBoundary.message')}
               </p>
               <div className="flex gap-3 justify-center">
                 <button
@@ -48,14 +50,14 @@ class ErrorBoundary extends React.Component<Props, State> {
                   className="flex items-center gap-2 px-5 py-2 bg-skin-control-bg hover:bg-skin-control-hover text-skin-control-text rounded-lg font-medium transition-colors"
                 >
                   <RotateCcw size={16} />
-                  تلاش مجدد
+                  {t('errorBoundary.retry')}
                 </button>
                 <button
                   onClick={() => window.location.reload()}
                   className="flex items-center gap-2 px-5 py-2 bg-skin-primary hover:bg-skin-primary-hover text-white rounded-lg font-medium transition-colors"
                 >
                   <RefreshCw size={16} />
-                  بارگذاری مجدد
+                  {t('errorBoundary.reload')}
                 </button>
               </div>
             </div>
@@ -68,4 +70,4 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 }
 
-export default ErrorBoundary;
+export default withTranslation()(ErrorBoundary);

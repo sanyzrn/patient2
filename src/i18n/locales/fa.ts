@@ -235,6 +235,37 @@ const fa = {
   videoCard: {
     playAria: 'پخش ویدئو {{title}}',
   },
+  hero: {
+    regionAria: 'بنرهای معرفی',
+    readMore: 'مشاهده بیشتر',
+    catalogCount: '{{count}} کاتالوگ آموزشی',
+    bannerImageAlt: 'تصویر بنر',
+    prevBanner: 'بنر قبلی',
+    nextBanner: 'بنر بعدی',
+    showBanner: 'نمایش بنر {{n}}',
+  },
+  qrModal: {
+    scanHint: 'برای اشتراک‌گذاری با بیمار اسکن کنید',
+  },
+  image: {
+    unavailable: 'تصویر در دسترس نیست',
+  },
+  errorBoundary: {
+    title: 'مشکلی پیش آمد',
+    message: 'متأسفانه یک خطای غیرمنتظره رخ داد. می‌توانید دوباره تلاش کنید یا صفحه را بارگذاری مجدد کنید.',
+    retry: 'تلاش مجدد',
+    reload: 'بارگذاری مجدد',
+  },
+  videoPlayer: {
+    playAria: 'پخش ویدئو: {{title}}',
+    speedAria: 'سرعت {{speed}}×',
+    pipEnter: 'تصویر در تصویر',
+    pipExit: 'خروج از تصویر در تصویر',
+    loadError: 'خطا در بارگذاری ویدئو',
+    unknownError: 'خطای نامشخص در پخش ویدئو',
+    unsupported: 'مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.',
+    publishedDate: 'تاریخ انتشار: {{date}}',
+  },
   catalogCard: {
     downloadPdf: 'دانلود PDF',
     viewNewTab: 'مشاهده در تب جدید',

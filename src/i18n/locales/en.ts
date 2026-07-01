@@ -235,6 +235,37 @@ const en = {
   videoCard: {
     playAria: 'Play video {{title}}',
   },
+  hero: {
+    regionAria: 'Promotional banners',
+    readMore: 'Read More',
+    catalogCount: '{{count}} educational catalogs',
+    bannerImageAlt: 'Banner image',
+    prevBanner: 'Previous banner',
+    nextBanner: 'Next banner',
+    showBanner: 'Show banner {{n}}',
+  },
+  qrModal: {
+    scanHint: 'Scan to share with a patient',
+  },
+  image: {
+    unavailable: 'Image unavailable',
+  },
+  errorBoundary: {
+    title: 'Something went wrong',
+    message: 'Unfortunately, an unexpected error occurred. You can try again or reload the page.',
+    retry: 'Try Again',
+    reload: 'Reload Page',
+  },
+  videoPlayer: {
+    playAria: 'Play video: {{title}}',
+    speedAria: 'Speed {{speed}}×',
+    pipEnter: 'Picture-in-Picture',
+    pipExit: 'Exit Picture-in-Picture',
+    loadError: 'Error loading video',
+    unknownError: 'Unknown video playback error',
+    unsupported: 'Your browser does not support video playback.',
+    publishedDate: 'Published: {{date}}',
+  },
   catalogCard: {
     downloadPdf: 'Download PDF',
     viewNewTab: 'Open in New Tab',

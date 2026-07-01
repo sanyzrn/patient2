@@ -1,7 +1,9 @@
 // Shared SafeImage component with error fallback.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
-const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%2394a3b8'%3Eتصویر در دسترس نیست%3C/text%3E%3C/svg%3E`;
+const placeholderSvg = (label: string) =>
+  `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%2394a3b8'%3E${encodeURIComponent(label)}%3C/text%3E%3C/svg%3E`;
 
 interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
@@ -14,13 +16,15 @@ const SafeImage: React.FC<SafeImageProps> = ({
   onError,
   ...props
 }) => {
+  const { t } = useTranslation();
   const [imgSrc, setImgSrc] = useState(src);
+  const placeholder = useMemo(() => placeholderSvg(t('image.unavailable')), [t]);
 
   // Re-attempt loading whenever the source prop changes (e.g. data loads async).
   useEffect(() => { setImgSrc(src); }, [src]);
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    setImgSrc(fallbackSrc || PLACEHOLDER_SVG);
+    setImgSrc(fallbackSrc || placeholder);
     onError?.(e);
   };
 
