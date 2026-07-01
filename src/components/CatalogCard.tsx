@@ -2,12 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { BookOpen, Download, FileText, Link2, Printer, ChevronDown, Heart, Volume2, VolumeX, QrCode, Package } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Catalog } from '../types';
+import { useTranslation } from 'react-i18next';
+import { Catalog, SupportedLang } from '../types';
 import SafeImage from './SafeImage';
+import i18n, { RTL_LANGS, SPEECH_LANG_MAP } from '../i18n';
 import { speakText, stopSpeaking } from '../utils/tts';
 import { highlightText, isSafeHttpUrl } from '../utils/helpers';
 import { useCachedCatalogs } from '../hooks/useCachedCatalogs';
 import QrModal from './QrModal';
+
+const LANG_BADGE: Record<SupportedLang, { label: string; flag: string; dir: 'rtl' | 'ltr' }> = {
+  fa: { label: 'FA', flag: '🇮🇷', dir: 'rtl' },
+  en: { label: 'EN', flag: '🇬🇧', dir: 'ltr' },
+  ar: { label: 'AR', flag: '🇸🇦', dir: 'rtl' },
+  ru: { label: 'RU', flag: '🇷🇺', dir: 'ltr' },
+};
 
 interface CatalogCardProps {
   catalog: Catalog;
@@ -25,6 +34,7 @@ const ActionPopover: React.FC<{
   onClose: () => void;
   onShowQr?: () => void;
 }> = ({ catalog, onClose, onShowQr }) => {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,7 +60,7 @@ const ActionPopover: React.FC<{
       // Fix 1.2: open in new tab for cross-origin resources
       window.open(catalog.pages[0], '_blank', 'noopener,noreferrer');
     } else {
-      toast.error('آدرس نامعتبر است.');
+      toast.error(t('viewer.invalidUrl'));
     }
     onClose();
   };
@@ -59,9 +69,9 @@ const ActionPopover: React.FC<{
     const url = `${window.location.origin}${window.location.pathname}?cat=${catalog.id}&page=1`;
     try {
       await navigator.clipboard.writeText(url);
-      toast.success('لینک کپی شد');
+      toast.success(t('catalogCard.linkCopied'));
     } catch {
-      toast.error('خطا در کپی لینک');
+      toast.error(t('catalogCard.linkCopyError'));
     }
     onClose();
   };
@@ -73,7 +83,7 @@ const ActionPopover: React.FC<{
       try {
         await navigator.share({
           title: catalog.title,
-          text: `کاتالوگ ${catalog.title} از پورتال آموزشی نفس فارمد`,
+          text: t('catalogCard.shareText', { title: catalog.title }),
           url,
         });
       } catch (err) {
@@ -128,22 +138,33 @@ const ActionPopover: React.FC<{
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] ?? c)
       );
 
+    // The handout follows the catalog's own language (not the current UI
+    // language), since it's printed material meant for that catalog's reader.
+    const handoutLang = catalog.language ?? 'fa';
+    const ht = i18n.getFixedT(handoutLang);
+    const dir = RTL_LANGS.includes(handoutLang) ? 'rtl' : 'ltr';
+    const fontImport = handoutLang === 'ru'
+      ? "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700;900&display=swap');"
+      : "@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');";
+    const fontFamily = handoutLang === 'ru' ? "'Noto Sans', sans-serif" : "'Vazirmatn', sans-serif";
+    const dateLocale = { fa: 'fa-IR', en: 'en-US', ar: 'ar-SA', ru: 'ru-RU' }[handoutLang];
+
     const html = `<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="${handoutLang}" dir="${dir}">
 <head>
 <meta charset="UTF-8">
-<title>بروشور بیمار — ${esc(catalog.title)}</title>
+<title>${esc(ht('catalogCard.handoutTitle', { title: catalog.title }))}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
+  ${fontImport}
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Vazirmatn', sans-serif; direction: rtl; color: #1a1a1a; background: white; }
+  body { font-family: ${fontFamily}; direction: ${dir}; color: #1a1a1a; background: white; }
   .page { max-width: 210mm; height: 297mm; margin: 0 auto; padding: 20mm; display: flex; flex-direction: column; }
   .header { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid #b61615; padding-bottom: 16px; margin-bottom: 20px; }
   .logo { width: 48px; height: 48px; background: #b61615; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; flex-shrink: 0; }
   .company { font-weight: 900; font-size: 16px; }
   .company-sub { font-size: 12px; color: #6b7280; }
   .catalog-title { font-size: 26px; font-weight: 900; color: #b61615; margin-bottom: 8px; }
-  .catalog-cover { width: 100px; height: 140px; object-fit: cover; border-radius: 12px; float: left; margin: 0 0 12px 12px; border: 2px solid #e2e8f0; flex-shrink: 0; }
+  .catalog-cover { width: 100px; height: 140px; object-fit: cover; border-radius: 12px; float: ${dir === 'rtl' ? 'left' : 'right'}; margin: 0 12px 12px 12px; border: 2px solid #e2e8f0; flex-shrink: 0; }
   .description { font-size: 14px; line-height: 1.8; color: #374151; margin-bottom: 16px; }
   .patient-section { margin-top: 16px; border: 2px dashed #e2e8f0; border-radius: 12px; padding: 16px; flex-grow: 1; }
   .patient-section h3 { font-size: 14px; font-weight: 700; color: #6b7280; margin-bottom: 12px; }
@@ -151,7 +172,7 @@ const ActionPopover: React.FC<{
   .field-label { font-weight: 700; min-width: 80px; color: #374151; }
   .field-line { flex: 1; border-bottom: 1px solid #d1d5db; min-height: 20px; }
   .footer { margin-top: auto; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #e2e8f0; padding-top: 8px; }
-  @media print { 
+  @media print {
     .page { padding: 15mm; margin: 0; }
     body { background: white; }
   }
@@ -162,21 +183,21 @@ const ActionPopover: React.FC<{
   <div class="header">
     <div class="logo">📚</div>
     <div>
-      <div class="company">نفس زیست فارمد</div>
-      <div class="company-sub">پورتال آموزش بیمار</div>
+      <div class="company">${esc(ht('catalogCard.handoutCompany'))}</div>
+      <div class="company-sub">${esc(ht('catalogCard.handoutPortalTagline'))}</div>
     </div>
   </div>
   <h1 class="catalog-title">${esc(catalog.title)}</h1>
   <img src="${esc(catalog.coverImage)}" class="catalog-cover" alt="" onerror="this.style.display='none'" />
   <p class="description">${esc(catalog.description)}</p>
   <div class="patient-section">
-    <h3>اطلاعات بیمار و دستورات پزشک</h3>
-    <div class="field"><span class="field-label">نام بیمار:</span><div class="field-line"></div></div>
-    <div class="field"><span class="field-label">تاریخ:</span><div class="field-line"></div></div>
-    <div class="field"><span class="field-label">نام پزشک:</span><div class="field-line"></div></div>
-    <div class="field"><span class="field-label">دستورات:</span><div class="field-line" style="min-height:40px"></div></div>
+    <h3>${esc(ht('catalogCard.handoutPatientInfo'))}</h3>
+    <div class="field"><span class="field-label">${esc(ht('catalogCard.handoutPatientName'))}</span><div class="field-line"></div></div>
+    <div class="field"><span class="field-label">${esc(ht('catalogCard.handoutDate'))}</span><div class="field-line"></div></div>
+    <div class="field"><span class="field-label">${esc(ht('catalogCard.handoutDoctorName'))}</span><div class="field-line"></div></div>
+    <div class="field"><span class="field-label">${esc(ht('catalogCard.handoutInstructions'))}</span><div class="field-line" style="min-height:40px"></div></div>
   </div>
-  <div class="footer">nafaspharmed.com · ${esc(catalog.pageCount)} صفحه · ${new Date().toLocaleDateString('fa-IR')}</div>
+  <div class="footer">nafaspharmed.com · ${esc(ht('catalogCard.handoutPageCount', { count: catalog.pageCount }))} · ${new Date().toLocaleDateString(dateLocale)}</div>
 </div>
 <script>window.onload = () => window.print();</script>
 </body></html>`;
@@ -197,7 +218,7 @@ const ActionPopover: React.FC<{
           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-skin-text hover:bg-skin-control-bg transition-colors text-right"
         >
           <Download size={14} className="text-skin-primary shrink-0" />
-          {catalog.pdfUrl ? 'دانلود PDF' : 'مشاهده در تب جدید'}
+          {catalog.pdfUrl ? t('catalogCard.downloadPdf') : t('catalogCard.viewNewTab')}
         </button>
       )}
       <button
@@ -205,14 +226,14 @@ const ActionPopover: React.FC<{
         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-skin-text hover:bg-skin-control-bg transition-colors text-right"
       >
         <Link2 size={14} className="text-skin-primary shrink-0" />
-        اشتراک‌گذاری لینک
+        {t('catalogCard.shareLink')}
       </button>
       <button
         onClick={handlePrint}
         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-skin-text hover:bg-skin-control-bg transition-colors text-right"
       >
         <Printer size={14} className="text-skin-primary shrink-0" />
-        چاپ صفحه اول
+        {t('catalogCard.printFirstPage')}
       </button>
       {/* SURPRISE-06: Patient Handout Generator */}
       <button
@@ -220,7 +241,7 @@ const ActionPopover: React.FC<{
         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-skin-text hover:bg-skin-control-bg transition-colors text-right"
       >
         <FileText size={14} className="text-skin-primary shrink-0" />
-        بروشور بیمار 🖨️
+        {t('catalogCard.patientHandout')}
       </button>
       {/* SURPRISE-02: QR Code button */}
       <button
@@ -246,6 +267,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
   onToggleFavorite,
   searchTerm = '',
 }) => {
+  const { t } = useTranslation();
   const [showPopover, setShowPopover] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -257,8 +279,8 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
   const isCached = useCachedCatalogs(catalog.id);
 
   useEffect(() => {
-    const t = setTimeout(() => setShimmerActive(true), 100);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setShimmerActive(true), 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // SURPRISE-04: Handle speech synthesis end
@@ -281,10 +303,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
     }
   }, [catalog.id]);
 
-  const langData =
-    catalog.language === 'en'
-      ? { label: 'EN', flag: '🇬🇧', dir: 'ltr' as const }
-      : { label: 'FA', flag: '🇮🇷', dir: 'rtl' as const };
+  const langData = LANG_BADGE[catalog.language ?? 'fa'];
 
   if (viewMode === 'list') {
     return (
@@ -300,7 +319,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
           role="button"
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(catalog); } }}
-          aria-label={`باز کردن کاتالوگ ${catalog.title}`}
+          aria-label={t('catalogCard.openCatalogAria', { title: catalog.title })}
         >
           {/* Fix 2.4 list: accent bar on right (RTL) */}
           <div className="absolute right-0 top-0 bottom-0 w-[3px] bg-skin-primary rounded-r-2xl" />
@@ -320,14 +339,14 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
           <div className="flex-1 min-w-0 p-3 pr-0 flex flex-col justify-center gap-1">
             <h3
               className="font-bold text-skin-text text-sm leading-snug line-clamp-2"
-              {...(catalog.language === 'en' ? { lang: 'en', dir: 'ltr' } : {})}
+              {...(catalog.language ? { lang: catalog.language, dir: langData.dir } : {})}
             >
               {highlightText(catalog.title, searchTerm)}
             </h3>
             <div className="flex items-center gap-2 text-xs text-skin-muted">
               <span>{catalog.category}</span>
               <span>·</span>
-              <span>{catalog.pageCount} صفحه</span>
+              <span>{t('catalogCard.pageCount', { count: catalog.pageCount })}</span>
             </div>
             <div className="flex items-center gap-1 text-xs text-skin-muted">
               <span>{langData.flag}</span>
@@ -345,8 +364,8 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
               <button
                 onClick={() => onToggleFavorite(catalog.id)}
                 className="p-2 rounded-lg hover:bg-skin-control-bg text-skin-muted hover:text-red-500 transition-all"
-                title={isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'}
-                aria-label={isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'}
+                title={isFavorite ? t('favorites.removeTooltip') : t('catalogCard.addFavorite')}
+                aria-label={isFavorite ? t('favorites.removeTooltip') : t('catalogCard.addFavorite')}
               >
                 <Heart
                   size={16}
@@ -365,7 +384,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
                 } else {
                   speakText(
                     `${catalog.title}. ${catalog.description}`,
-                    catalog.language === 'en' ? 'en-US' : 'fa-IR'
+                    SPEECH_LANG_MAP[catalog.language ?? 'fa']
                   );
                   setIsSpeaking(true);
                 }
@@ -375,8 +394,8 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
                   ? 'text-skin-primary bg-skin-primary/10'
                   : 'text-skin-muted hover:text-skin-primary hover:bg-skin-control-bg'
               }`}
-              title={isSpeaking ? 'توقف گوش دادن' : 'شنیدن توضیحات'}
-              aria-label={isSpeaking ? 'توقف گوش دادن' : 'شنیدن توضیحات'}
+              title={isSpeaking ? t('catalogCard.stopListening') : t('catalogCard.listenDescription')}
+              aria-label={isSpeaking ? t('catalogCard.stopListening') : t('catalogCard.listenDescription')}
             >
               {isSpeaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
@@ -385,8 +404,8 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
               <button
                 onClick={() => setShowPopover(v => !v)}
                 className="p-2 rounded-lg bg-skin-control-bg hover:bg-skin-primary hover:text-white text-skin-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-skin-primary"
-                title="اقدامات"
-                aria-label="اقدامات"
+                title={t('catalogCard.actions')}
+                aria-label={t('catalogCard.actions')}
               >
                 <ChevronDown size={14} />
               </button>
@@ -416,7 +435,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(catalog, savedPage ?? 0); } }}
-      aria-label={`باز کردن کاتالوگ ${catalog.title}`}
+      aria-label={t('catalogCard.openCatalogAria', { title: catalog.title })}
     >
       {/* Cover — aspect-[2/3] as redesigned */}
       <div className="relative aspect-[2/3] overflow-hidden bg-skin-control-bg group">
@@ -431,7 +450,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
         {/* SURPRISE-09: Offline cache indicator */}
         {isCached && (
           <span className="absolute top-2 left-2 z-10 bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-            <Package size={8} /> آفلاین
+            <Package size={8} /> {t('catalogCard.offlineBadge')}
           </span>
         )}
 
@@ -443,8 +462,8 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
               onToggleFavorite(catalog.id);
             }}
             className="absolute top-2 right-2 z-10 p-2 rounded-full bg-white/90 hover:bg-white shadow-md transition-all"
-            title={isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'}
-            aria-label={isFavorite ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'}
+            title={isFavorite ? t('favorites.removeTooltip') : t('catalogCard.addFavorite')}
+            aria-label={isFavorite ? t('favorites.removeTooltip') : t('catalogCard.addFavorite')}
           >
             <Heart
               size={18}
@@ -470,7 +489,7 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3 pb-2">
           <h3
             className="text-white text-sm font-bold leading-tight line-clamp-2 mb-2"
-            {...(catalog.language === 'en' ? { lang: 'en', dir: 'ltr' } : {})}
+            {...(catalog.language ? { lang: catalog.language, dir: langData.dir } : {})}
           >
             {highlightText(catalog.title, searchTerm)}
           </h3>
@@ -496,9 +515,9 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
             <button
               onClick={(e) => { e.stopPropagation(); onClick(catalog, savedPage); }}
               className="text-[10px] font-bold text-skin-primary bg-skin-primary/10 border border-skin-primary/30 rounded-full px-2 py-1 hover:bg-skin-primary hover:text-white transition-all truncate"
-              title={`ادامه از صفحه ${savedPage + 1}`}
+              title={t('catalogCard.resumeFromPage', { page: savedPage + 1 })}
             >
-              ادامه از صفحه {savedPage + 1}
+              {t('catalogCard.resumeFromPage', { page: savedPage + 1 })}
             </button>
           ) : (
             <>
@@ -508,13 +527,13 @@ const CatalogCard: React.FC<CatalogCardProps> = ({
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-          <span className="text-[10px] text-skin-muted">{catalog.pageCount}ص</span>
+          <span className="text-[10px] text-skin-muted">{t('catalogCard.pageCountShort', { count: catalog.pageCount })}</span>
           <div className="relative">
             <button
               onClick={() => setShowPopover(v => !v)}
               className="p-1.5 rounded-lg hover:bg-skin-control-bg text-skin-muted hover:text-skin-primary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-skin-primary"
-              title="اقدامات"
-              aria-label="اقدامات"
+              title={t('catalogCard.actions')}
+              aria-label={t('catalogCard.actions')}
             >
               <BookOpen size={13} />
             </button>

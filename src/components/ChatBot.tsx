@@ -6,7 +6,7 @@ import {
   Mic, Home, Info, Phone
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { RTL_LANGS } from '../i18n';
+import { RTL_LANGS, SPEECH_LANG_MAP } from '../i18n';
 import { WP_AJAX_URL } from '../config';
 import { PRODUCTS } from '../constants/products';
 
@@ -16,8 +16,6 @@ interface ChatBotProps {
 }
 
 type View = 'products' | 'chat' | 'adr' | 'consult' | 'success' | 'about' | 'contact';
-
-const MIC_LANG_MAP: Record<string, string> = { fa: 'fa-IR', en: 'en-US', ar: 'ar-SA', ru: 'ru-RU' };
 
 interface Message {
   id: string;
@@ -123,7 +121,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ open, onClose }) => {
     if (listening) { recogRef.current?.stop(); return; }
     if (!SpeechCtor) return;
     const r = new SpeechCtor();
-    r.lang = MIC_LANG_MAP[i18n.language] ?? 'fa-IR'; r.interimResults = false; r.continuous = false;
+    r.lang = SPEECH_LANG_MAP[i18n.language as keyof typeof SPEECH_LANG_MAP] ?? 'fa-IR'; r.interimResults = false; r.continuous = false;
     r.onresult = (e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => {
       const t = e.results?.[0]?.[0]?.transcript;
       if (t) setInput(prev => (prev ? prev + ' ' : '') + t);

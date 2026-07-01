@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Target, Eye, HeartPulse } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // ─── Shared bits ──────────────────────────────────────────────────────────────
 const fadeUp = {
@@ -12,23 +13,22 @@ const SectionTag: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <span className="inline-block text-skin-primary font-bold text-xs tracking-[0.15em] mb-2">{children}</span>
 );
 
-const ABOUT_PARAGRAPHS = [
-  'این شرکت با تکیه بر دانش فنی بومی، بهره‌گیری از فناوری‌های روز دنیا و همکاری تیمی از متخصصان حوزه‌های داروسازی، بیوتکنولوژی، مهندسی پزشکی و علوم پایه، توانسته است جایگاه ارزشمندی در توسعه محصولات دانش‌بنیان حوزه سلامت به دست آورد.',
-  'نفس زیست فارمد پس از سال‌ها تحقیق و توسعه مستمر، موفق به بومی‌سازی و تسلط بر دانش فنی پیشرفته در حوزه‌های فرمولاسیون دارویی و مهندسی آیرودینامیک ذرات (Aerodynamic Particle Engineering) گردیده است. این دستاورد علمی راهبردی، زمینه تولید نخستین داروی استنشاقی پودر خشک (Dry Powder Inhaler - DPI) مبتنی بر دانش فنی بومی در ایران را فراهم ساخته و موجب کسب گواهی دانش‌بنیان نوع یک برای این مجموعه شده است.',
-  'تعهد به نوآوری، کیفیت، توسعه پایدار، خودکفایی ملی و ارتقای سطح سلامت جامعه، از مهم‌ترین ارزش‌های سازمانی نفس زیست فارمد به شمار می‌رود. این شرکت با بهره‌گیری از استانداردهای سخت‌گیرانه کنترل کیفیت، همکاری با مراکز علمی و تحقیقاتی و تمرکز بر توسعه بازارهای داخلی و بین‌المللی، مسیر رشد و تعالی خود را با قدرت ادامه می‌دهد.',
-];
-
-const STATS = [
-  { num: '۱۳۹۸', label: 'سال تأسیس' },
-  { num: 'DPI', label: 'نخستین داروی استنشاقی پودر خشک بومی' },
-  { num: '۵+', label: 'محصول تخصصی سلامت' },
-  { num: 'نوع ۱', label: 'شرکت دانش‌بنیان' },
-];
-
-const VALUE_CHIPS = ['نوآوری', 'کیفیت', 'توسعه پایدار', 'خودکفایی ملی', 'ارتقای سلامت جامعه'];
-
 // ─── Company info block (placed below catalogs & videos) ──────────────────────
 const CompanyInfo: React.FC = () => {
+  const { t } = useTranslation();
+
+  const ABOUT_PARAGRAPHS = [t('company.aboutP1'), t('company.aboutP2'), t('company.aboutP3')];
+  const STATS = [
+    { num: t('company.statYear'), label: t('company.statYearLabel') },
+    { num: 'DPI', label: t('company.statDpiLabel') },
+    { num: t('company.statProducts'), label: t('company.statProductsLabel') },
+    { num: t('company.statType'), label: t('company.statTypeLabel') },
+  ];
+  const VALUE_CHIPS = [
+    t('company.valueInnovation'), t('company.valueQuality'), t('company.valueSustainableDev'),
+    t('company.valueSelfSufficiency'), t('company.valueHealthImprovement'),
+  ];
+
   return (
     <div className="space-y-14 mb-12">
 
@@ -43,10 +43,10 @@ const CompanyInfo: React.FC = () => {
         className="scroll-mt-24"
       >
         <div className="text-center mb-8">
-          <SectionTag>درباره ما</SectionTag>
-          <h2 className="text-2xl font-black text-skin-text tracking-tight">دانش بومی، استانداردهای جهانی</h2>
+          <SectionTag>{t('company.aboutTag')}</SectionTag>
+          <h2 className="text-2xl font-black text-skin-text tracking-tight">{t('company.aboutTitle')}</h2>
           <p className="text-skin-muted text-sm max-w-2xl mx-auto mt-3 leading-relaxed">
-            نفس زیست فارمد از سال ۱۳۹۸ با هدف توسعه فناوری‌های پیشرفته دارورسانی و تولید محصولات دارویی نوآورانه فعالیت می‌کند.
+            {t('company.aboutIntro')}
           </p>
         </div>
 
@@ -80,8 +80,8 @@ const CompanyInfo: React.FC = () => {
         className="scroll-mt-24"
       >
         <div className="text-center mb-8">
-          <SectionTag>هویت سازمانی</SectionTag>
-          <h2 className="text-2xl font-black text-skin-text tracking-tight">مأموریت و چشم‌انداز</h2>
+          <SectionTag>{t('company.identityTag')}</SectionTag>
+          <h2 className="text-2xl font-black text-skin-text tracking-tight">{t('company.missionVisionTitle')}</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -90,9 +90,9 @@ const CompanyInfo: React.FC = () => {
             <div className="w-11 h-11 rounded-xl bg-skin-primary/10 text-skin-primary flex items-center justify-center mb-4">
               <Target size={22} />
             </div>
-            <h3 className="font-black text-skin-text mb-2">مأموریت شرکت</h3>
+            <h3 className="font-black text-skin-text mb-2">{t('company.missionTitle')}</h3>
             <p className="text-sm text-skin-muted leading-relaxed">
-              توسعه و تولید فرآورده‌های دارویی و تجهیزات پزشکی نوآورانه با بهره‌گیری از دانش فنی پیشرفته، به منظور بهبود کیفیت زندگی بیماران، ارتقای سطح سلامت جامعه و ایجاد دسترسی پایدار به درمان‌های مؤثر و ایمن.
+              {t('company.missionText')}
             </p>
           </div>
 
@@ -101,9 +101,9 @@ const CompanyInfo: React.FC = () => {
             <div className="w-11 h-11 rounded-xl bg-skin-primary/10 text-skin-primary flex items-center justify-center mb-4">
               <Eye size={22} />
             </div>
-            <h3 className="font-black text-skin-text mb-2">چشم‌انداز شرکت</h3>
+            <h3 className="font-black text-skin-text mb-2">{t('company.visionTitle')}</h3>
             <p className="text-sm text-skin-muted leading-relaxed">
-              تبدیل شدن به یکی از شرکت‌های پیشرو منطقه در حوزه فناوری‌های دارورسانی پیشرفته، داروهای استنشاقی و محصولات نوآورانه سلامت با حضور مؤثر در بازارهای بین‌المللی.
+              {t('company.visionText')}
             </p>
           </div>
 
@@ -112,14 +112,14 @@ const CompanyInfo: React.FC = () => {
             <div className="w-11 h-11 rounded-xl bg-skin-primary/10 text-skin-primary flex items-center justify-center mb-4">
               <HeartPulse size={22} />
             </div>
-            <h3 className="font-black text-skin-text mb-3">ارزش‌های ما</h3>
+            <h3 className="font-black text-skin-text mb-3">{t('company.valuesTitle')}</h3>
             <div className="flex flex-wrap gap-2">
               {VALUE_CHIPS.map((v) => (
                 <span key={v} className="text-xs font-bold bg-skin-primary/10 text-skin-primary px-3 py-1.5 rounded-full">{v}</span>
               ))}
             </div>
             <p className="text-xs text-skin-muted mt-4 leading-relaxed">
-              این ارزش‌ها قطب‌نمای تمامی تصمیمات و فعالیت‌های نفس زیست فارمد هستند.
+              {t('company.valuesFooter')}
             </p>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Command, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Catalog } from '../types';
 
 export interface PaletteCommand {
@@ -19,6 +20,7 @@ interface CommandPaletteProps {
 }
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, commands }) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -108,7 +110,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
                   setSearch(e.target.value);
                   setSelectedIndex(0);
                 }}
-                placeholder="جستجوی دستورات..."
+                placeholder={t('commandPalette.searchPlaceholder')}
                 className="flex-1 bg-transparent outline-none text-skin-text placeholder-skin-muted text-sm"
               />
               <button
@@ -123,7 +125,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
             <div className="max-h-96 overflow-y-auto">
               {Object.entries(filtered).length === 0 ? (
                 <div className="py-12 text-center text-skin-muted text-sm">
-                  دستوری یافت نشد
+                  {t('commandPalette.noResults')}
                 </div>
               ) : (
                 Object.entries(filtered).map(([group, cmds]) => (
@@ -164,7 +166,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, comman
 
             {/* Footer hint */}
             <div className="px-4 py-2 border-t border-skin-border bg-skin-control-bg/30 text-xs text-skin-muted text-center">
-              برای ناوبری از فلش‌های جهت دار استفاده کنید
+              {t('commandPalette.navHint')}
             </div>
           </motion.div>
         </motion.div>

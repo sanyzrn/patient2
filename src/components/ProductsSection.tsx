@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   BookMarked, BookOpen, ExternalLink, Wind, ThermometerSnowflake, Baby, Flower2, Stethoscope, type LucideIcon
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Catalog } from '../types';
 import { PRODUCTS } from '../constants/products';
 
@@ -21,6 +22,7 @@ const PRODUCT_ICONS: Record<string, LucideIcon> = {
 };
 
 const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatalog, sectionRef }) => {
+  const { t } = useTranslation();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [grabbing, setGrabbing] = useState(false);
@@ -132,14 +134,14 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
         <div className="flex items-center justify-between gap-4 mb-3">
           <div className="flex items-center gap-2.5">
             <span className="text-skin-primary"><BookMarked size={20} /></span>
-            <h2 className="text-xl font-black text-skin-text tracking-tight">محصولات</h2>
+            <h2 className="text-xl font-black text-skin-text tracking-tight">{t('products.sectionTitle')}</h2>
           </div>
           <span className="text-xs font-bold bg-skin-primary/10 text-skin-primary px-2.5 py-1 rounded-full border border-skin-primary/20 tabular-nums">
             {PRODUCTS.length}
           </span>
         </div>
         <div className="h-px w-full" style={{ background: 'linear-gradient(to left, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent)' }} />
-        <p className="text-sm text-skin-muted mt-3">طیفی از فرآورده‌های دارویی، مکمل‌های تخصصی و تجهیزات پزشکی نوآورانه</p>
+        <p className="text-sm text-skin-muted mt-3">{t('products.sectionDesc')}</p>
       </div>
 
       {/* Mobile: one-per-slide snap carousel · Desktop: drag slider (3.5 cards peek) */}
@@ -196,7 +198,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
                       className="flex items-center justify-center gap-1.5 w-full border border-skin-primary/40 text-skin-primary hover:bg-skin-primary/10 text-xs font-bold py-2 rounded-xl transition-colors"
                     >
                       <BookOpen size={13} />
-                      مشاهده کاتالوگ
+                      {t('products.viewCatalog')}
                     </button>
                   )}
 
@@ -206,7 +208,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-1.5 w-full bg-skin-primary hover:bg-skin-primary-hover text-white text-xs font-bold py-2 rounded-xl transition-colors"
                   >
-                    صفحه محصول
+                    {t('products.productPage')}
                     <ExternalLink size={13} />
                   </a>
                 </div>
@@ -222,7 +224,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ catalogs, onOpenCatal
           <button
             key={p.id}
             onClick={() => goToSlide(i)}
-            aria-label={`محصول ${i + 1}`}
+            aria-label={t('products.paginationAria', { n: i + 1 })}
             className={`h-2 rounded-full transition-all ${active === i ? 'w-6 bg-skin-primary' : 'w-2 bg-skin-border'}`}
           />
         ))}
