@@ -361,6 +361,7 @@ const LangSwitcher: React.FC<{ currentLang: SupportedLang; onChangeLang: (lang: 
 
 // ─── Footer (Fix 2.9) ─────────────────────────────────────────────────────────
 const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ theme, setTheme }) => {
+  const { t } = useTranslation();
   const [extOpen, setExtOpen] = useState(false);
   return (
     <footer className="bg-skin-card border-t border-skin-border mt-16">
@@ -371,29 +372,29 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
           {/* Logo + company */}
           <div className="flex flex-col items-center md:items-start gap-3">
             <div className="flex items-center gap-3">
-              <img src={theme === 'dark' ? LOGO_URL_DARK : LOGO_URL} alt="نفس زیست فارمد" className="h-10 w-auto object-contain" />
+              <img src={theme === 'dark' ? LOGO_URL_DARK : LOGO_URL} alt={t('header.logoAriaLabel')} className="h-10 w-auto object-contain" />
               <div>
-                <p className="text-xs text-skin-muted text-center md:text-right">پورتال آموزش بیمار</p>
-                <p className="text-xs font-bold text-skin-primary mt-0.5 text-center md:text-right">مراقب شما در هر نفس</p>
+                <p className="text-xs text-skin-muted text-center md:text-right">{t('footer.portalTagline')}</p>
+                <p className="text-xs font-bold text-skin-primary mt-0.5 text-center md:text-right">{t('header.tagline')}</p>
               </div>
             </div>
             <p className="text-xs text-skin-muted leading-relaxed mt-2 text-center md:text-justify max-w-sm">
-              شرکت دانش‌بنیان نفس زیست فارمد از سال ۱۳۹۸ با هدف توسعه داروهای استنشاقی پیشرفته و ارتقای سلامت جامعه آغاز به کار کرده است.
+              {t('footer.companyDesc')}
             </p>
           </div>
 
           {/* Quick links */}
           <div className="flex flex-col items-center md:items-start gap-4">
-            <p className="text-sm font-bold text-skin-text">دسترسی سریع</p>
+            <p className="text-sm font-bold text-skin-text">{t('footer.quickLinks')}</p>
             <div className="flex flex-col items-center md:items-start gap-3 text-xs text-skin-muted">
               {[
-                { label: 'کاتالوگ‌ها', href: '#catalogs' },
-                { label: 'ویدئوها', href: '#videos' },
-                { label: 'محصولات', href: '#products' },
-                { label: 'درباره ما', href: '#about' },
-                { label: 'ارتباط با ما', href: 'mailto:info@nafaspharmed.com' },
+                { label: t('footer.linkCatalogs'), href: '#catalogs' },
+                { label: t('footer.linkVideos'), href: '#videos' },
+                { label: t('footer.linkProducts'), href: '#products' },
+                { label: t('footer.linkAbout'), href: '#about' },
+                { label: t('footer.linkContact'), href: 'mailto:info@nafaspharmed.com' },
               ].map(({ label, href }) => (
-                <a key={label} href={href} className="hover:text-skin-primary transition-colors flex items-center gap-2">
+                <a key={href} href={href} className="hover:text-skin-primary transition-colors flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-skin-border"></span>
                   {label}
                 </a>
@@ -403,34 +404,34 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
 
           {/* Contact */}
           <div className="flex flex-col items-center md:items-start gap-4">
-            <p className="text-sm font-bold text-skin-text">ارتباط با ما</p>
+            <p className="text-sm font-bold text-skin-text">{t('footer.contactUs')}</p>
             <div className="flex flex-col items-center md:items-start text-xs text-skin-muted space-y-3 w-full">
               <a href="tel:02192001520" className="flex items-center gap-2 hover:text-skin-primary transition-colors">
                 <Phone size={14} className="text-skin-primary shrink-0" /> <span dir="ltr">۰۲۱ ۹۲۰۰ ۱۵۲۰</span>
               </a>
               <button onClick={() => setExtOpen(true)} className="flex items-center gap-2 hover:text-skin-primary transition-colors">
-                <Hash size={14} className="text-skin-primary shrink-0" /> تلفن داخلی واحدها
+                <Hash size={14} className="text-skin-primary shrink-0" /> {t('footer.internalExt')}
               </button>
               <details className="group w-full md:w-auto">
                 <summary className="flex items-center justify-center md:justify-start gap-2 cursor-pointer hover:text-skin-primary transition-colors list-none [&::-webkit-details-marker]:hidden">
-                  <MapPin size={14} className="text-skin-primary shrink-0" /> آدرس دفتر مرکزی
+                  <MapPin size={14} className="text-skin-primary shrink-0" /> {t('footer.headOffice')}
                   <ChevronUp size={12} className="rotate-180 group-open:rotate-0 transition-transform mr-1" />
                 </summary>
-                <p className="mt-2 text-center md:text-right leading-relaxed md:pr-6 mx-auto md:mx-0 max-w-[260px] md:max-w-none">تهران، بلوار پژوهش، پژوهشگاه ملی و مهندسی ژنتیک، ساختمان بیوتک سنتر، واحد ۱۰۱</p>
+                <p className="mt-2 text-center md:text-right leading-relaxed md:pr-6 mx-auto md:mx-0 max-w-[260px] md:max-w-none">{t('footer.headOfficeAddress')}</p>
               </details>
               <details className="group w-full md:w-auto">
                 <summary className="flex items-center justify-center md:justify-start gap-2 cursor-pointer hover:text-skin-primary transition-colors list-none [&::-webkit-details-marker]:hidden">
-                  <Factory size={14} className="text-skin-primary shrink-0" /> آدرس کارخانه
+                  <Factory size={14} className="text-skin-primary shrink-0" /> {t('footer.factory')}
                   <ChevronUp size={12} className="rotate-180 group-open:rotate-0 transition-transform mr-1" />
                 </summary>
-                <p className="mt-2 text-center md:text-right leading-relaxed md:pr-6 mx-auto md:mx-0 max-w-[260px] md:max-w-none">صفادشت، بلوار مطهری شمالی (پدم)، کوچهٔ دوم شرقی، پلاک ۴، مجموعهٔ پیشتاز</p>
+                <p className="mt-2 text-center md:text-right leading-relaxed md:pr-6 mx-auto md:mx-0 max-w-[260px] md:max-w-none">{t('footer.factoryAddress')}</p>
               </details>
-              
+
               <div className="flex items-center justify-center md:justify-start gap-2 pt-2 w-full md:w-auto">
-                <a href="https://ble.ir/nafaspharmedproductbot" target="_blank" rel="noopener noreferrer" title="ربات هوشمند بله" className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><Bot size={16} /></a>
-                <a href="https://www.linkedin.com/company/nafas-zist-pharmed/" target="_blank" rel="noopener noreferrer" title="لینکدین" className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><LinkedinIcon /></a>
-                <a href="https://jobvision.ir/companies/48055/%D8%A7%D8%B3%D8%AA%D8%AE%D8%AF%D8%A7%D9%85-%D8%AF%D8%A7%D8%B1%D9%88%D8%B3%D8%A7%D8%B2%DB%8C-%D9%86%D9%81%D8%B3-%D8%B2%DB%8C%D8%B3%D8%AA-%D9%81%D8%A7%D8%B1%D9%85%D8%AF" target="_blank" rel="noopener noreferrer" title="فرصت‌های شغلی (جاب‌ویژن)" className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><Briefcase size={16} /></a>
-                <a href="https://nafaspharmed.com" target="_blank" rel="noopener noreferrer" title="وب‌سایت" className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><Globe size={16} /></a>
+                <a href="https://ble.ir/nafaspharmedproductbot" target="_blank" rel="noopener noreferrer" title={t('footer.socialBale')} className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><Bot size={16} /></a>
+                <a href="https://www.linkedin.com/company/nafas-zist-pharmed/" target="_blank" rel="noopener noreferrer" title={t('footer.socialLinkedin')} className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><LinkedinIcon /></a>
+                <a href="https://jobvision.ir/companies/48055/%D8%A7%D8%B3%D8%AA%D8%AE%D8%AF%D8%A7%D9%85-%D8%AF%D8%A7%D8%B1%D9%88%D8%B3%D8%A7%D8%B2%DB%8C-%D9%86%D9%81%D8%B3-%D8%B2%DB%8C%D8%B3%D8%AA-%D9%81%D8%A7%D8%B1%D9%85%D8%AF" target="_blank" rel="noopener noreferrer" title={t('footer.socialJobs')} className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><Briefcase size={16} /></a>
+                <a href="https://nafaspharmed.com" target="_blank" rel="noopener noreferrer" title={t('footer.socialWebsite')} className="w-9 h-9 rounded-xl bg-skin-control-bg hover:bg-skin-primary hover:text-white flex items-center justify-center transition-colors"><Globe size={16} /></a>
               </div>
             </div>
           </div>
@@ -440,8 +441,8 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
 
         {/* Bottom row */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 mt-6 border-t border-skin-border">
-          <p className="text-xs text-skin-muted order-2 md:order-1">© {new Date().getFullYear()} نفس زیست فارمد. تمامی حقوق محفوظ است.</p>
-          
+          <p className="text-xs text-skin-muted order-2 md:order-1">{t('footer.copyright', { year: new Date().getFullYear() })}</p>
+
           <a href={DBS_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] text-skin-muted md:opacity-75 hover:opacity-100 transition-opacity group order-1 md:order-2" dir="ltr">
             <span className="font-sans tracking-wide">Developed by DBS &amp; Claude</span>
             <img src={DBS_LOGO_URL} alt="DBS Graphic" className="h-3.5 w-auto object-contain" />
@@ -450,7 +451,7 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
 
         {/* Version */}
         <div className="mt-4 text-center">
-          <span className="text-[10px] font-mono text-skin-muted/60 tracking-wide">نسخه {APP_VERSION}</span>
+          <span className="text-[10px] font-mono text-skin-muted/60 tracking-wide">{t('footer.version', { version: APP_VERSION })}</span>
         </div>
       </div>
     </footer>
@@ -903,7 +904,7 @@ const InnerApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-skin-base" dir={isRtl ? 'rtl' : 'ltr'}>
       <ScrollProgressBar progress={scrollProgress} />
-      <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Vazirmatn, sans-serif', direction: isRtl ? 'rtl' : 'ltr', fontSize: '13px' } }} />
+      <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'var(--font-sans)', direction: isRtl ? 'rtl' : 'ltr', fontSize: '13px' } }} />
 
       {/* SURPRISE-01: Command Palette */}
       <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} commands={paletteCommands} />

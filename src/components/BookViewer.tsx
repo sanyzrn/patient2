@@ -3,6 +3,7 @@ import HTMLFlipBook from 'react-pageflip';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Catalog } from '../types';
 import {
   X, ChevronRight, ChevronLeft, Maximize, Minimize,
@@ -48,6 +49,7 @@ const PdfPage = React.forwardRef<HTMLDivElement, {
   pageNumber: number;
   onRendered?: (dataUrl: string) => void;
 }>((props, ref) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rendered, setRendered] = useState(false);
 
@@ -85,7 +87,7 @@ const PdfPage = React.forwardRef<HTMLDivElement, {
     <div ref={ref} className="relative bg-white overflow-hidden select-none">
       {!rendered && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-          <div className="text-xs text-gray-400">در حال تبدیل صفحه...</div>
+          <div className="text-xs text-gray-400">{t('viewer.convertingPage')}</div>
         </div>
       )}
       <canvas ref={canvasRef} className="w-full h-auto" />
@@ -97,6 +99,7 @@ PdfPage.displayName = 'PdfPage';
 
 // Main BookViewer
 const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage = 0, allCatalogs = [], onOpenCatalog }) => {
+  const { t } = useTranslation();
   const bookRef = useRef<{ pageFlip: () => { flipNext: () => void; flipPrev: () => void; flip: (n: number) => void; pages: { length: number } } }>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -141,7 +144,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
     const shown = localStorage.getItem('nafas_kb_hint_shown');
     if (!shown) {
       setTimeout(() => {
-        toast('نکته: از کلیدهای ← → برای ورق زدن استفاده کنید.', { icon: '⌨️', duration: 4000 });
+        toast(t('viewer.kbHint'), { icon: '⌨️', duration: 4000 });
         localStorage.setItem('nafas_kb_hint_shown', '1');
       }, 1000);
     }
@@ -163,7 +166,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
         setIsLoadingPdf(false);
       }).catch(err => {
         console.error('Error loading PDF:', err);
-        setPdfError('خطا در دریافت کاتالوگ PDF');
+        setPdfError(t('viewer.pdfLoadError'));
         setIsLoadingPdf(false);
       });
       return () => { loadingTask.destroy(); };
@@ -304,7 +307,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
     } else if (catalog.pages[0] && isSafeHttpUrl(catalog.pages[0], true)) {
       window.open(catalog.pages[0], '_blank', 'noopener,noreferrer');
     } else {
-      toast.error('آدرس نامعتبر است.');
+      toast.error(t('viewer.invalidUrl'));
     }
   };
 
@@ -314,14 +317,14 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
       const cache = await caches.open('assets-cache');
       if (usePdfMode && catalog.pdfUrl) await cache.add(catalog.pdfUrl).catch(() => {});
       else await Promise.allSettled(catalog.pages.map(p => cache.add(p)));
-      toast.success('کاتالوگ برای استفاده آفلاین ذخیره شد.');
-    } catch { toast.error('خطا در ذخیره‌سازی آفلاین.'); }
+      toast.success(t('viewer.savedOffline'));
+    } catch { toast.error(t('viewer.saveOfflineError')); }
     setIsCaching(false);
   };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success('لینک صفحه کپی شد!');
+    toast.success(t('viewer.linkCopied'));
   };
 
   // Gesture handlers
@@ -398,7 +401,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
       ref={el => { containerRef.current = el; dialogRef.current = el; }}
       role="dialog"
       aria-modal="true"
-      aria-label="نمایش کاتالوگ"
+      aria-label={t('viewer.dialogLabel')}
       tabIndex={-1}
       className="fixed inset-0 z-50 flex flex-col bg-skin-overlay backdrop-blur-md animate-fade-in touch-none select-none overflow-hidden"
     >
@@ -413,12 +416,12 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
               </button>
               {showToc && (
                 <div className="absolute top-full right-0 mt-1 bg-skin-card border border-skin-border rounded-xl shadow-xl p-2 z-20 min-w-[180px]">
-                  <p className="text-xs font-bold text-skin-muted px-2 py-1">فهرست مطالب</p>
+                  <p className="text-xs font-bold text-skin-muted px-2 py-1">{t('viewer.toc')}</p>
                   {catalog.toc!.map((item, i) => (
                     <button key={i} onClick={() => { goToPage(item.page); setShowToc(false); }}
                       className="w-full flex items-center justify-between gap-2 text-right px-2 py-1.5 rounded-lg text-xs text-skin-text hover:bg-skin-control-bg transition-colors">
                       <span>{item.title}</span>
-                      <span className="text-skin-muted">ص {item.page + 1}</span>
+                      <span className="text-skin-muted">{item.page + 1}</span>
                     </button>
                   ))}
                 </div>
@@ -430,9 +433,9 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
           <div className="flex-1 min-w-0 text-center">
             <p className="text-sm font-bold text-skin-text truncate">{catalog.title}</p>
             <div className="flex flex-col gap-0.5 items-center">
-              <p className="text-xs text-skin-muted">صفحه {currentPage + 1} از {totalPagesNum}</p>
-              {pagesLeft > 0 && <p className="text-xs text-skin-muted">≈{minutesLeft} دقیقه مانده</p>}
-              {pagesLeft === 0 && <p className="text-xs text-skin-primary font-semibold">پایان رسید! 🎉</p>}
+              <p className="text-xs text-skin-muted">{t('viewer.pageOf', { current: currentPage + 1, total: totalPagesNum })}</p>
+              {pagesLeft > 0 && <p className="text-xs text-skin-muted">{t('viewer.minutesLeft', { count: minutesLeft })}</p>}
+              {pagesLeft === 0 && <p className="text-xs text-skin-primary font-semibold">{t('viewer.finished')}</p>}
             </div>
           </div>
 
@@ -440,16 +443,16 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
           <div className="flex items-center gap-1 flex-wrap justify-end">
             <div className="hidden md:flex items-center gap-1">
               {/* Zoom controls (desktop) */}
-              <button onClick={handleZoomOut} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title="کوچک‌نمایی"><ZoomOut size={14} /></button>
-              <button onClick={handleZoomReset} className="text-[10px] text-skin-muted font-mono w-9 text-center hover:text-skin-primary transition-colors" title="بازنشانی بزرگ‌نمایی">{Math.round(zoomLevel * 100)}%</button>
-              <button onClick={handleZoomIn} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title="بزرگ‌نمایی"><ZoomIn size={14} /></button>
+              <button onClick={handleZoomOut} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={t('viewer.zoomOut')}><ZoomOut size={14} /></button>
+              <button onClick={handleZoomReset} className="text-[10px] text-skin-muted font-mono w-9 text-center hover:text-skin-primary transition-colors" title={t('viewer.zoomReset')}>{Math.round(zoomLevel * 100)}%</button>
+              <button onClick={handleZoomIn} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={t('viewer.zoomIn')}><ZoomIn size={14} /></button>
               <div className="w-px h-4 bg-skin-border mx-1" />
-              <button onClick={() => setForceSinglePage(!forceSinglePage)} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={forceSinglePage ? 'دو صفحه' : 'تک صفحه'}>{forceSinglePage ? <Book size={14} /> : <Smartphone size={14} />}</button>
-              <button onClick={() => setIsSoundEnabled(!isSoundEnabled)} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={isSoundEnabled ? 'قطع صدا' : 'پخش صدا'}>{isSoundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}</button>
-              <button onClick={toggleFullscreen} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title="تمام‌صفحه">{isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}</button>
-              <button onClick={isCaching ? undefined : handleSaveOffline} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title="ذخیره آفلاین">{isCaching ? <PackageOpen size={14} className="animate-pulse" /> : <DownloadCloud size={14} />}</button>
-              <button onClick={handleDownload} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title="دانلود"><FileDown size={14} /></button>
-              <button onClick={handleShare} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title="اشتراک‌گذاری"><Share2 size={14} /></button>
+              <button onClick={() => setForceSinglePage(!forceSinglePage)} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={forceSinglePage ? t('viewer.doublePage') : t('viewer.singlePage')}>{forceSinglePage ? <Book size={14} /> : <Smartphone size={14} />}</button>
+              <button onClick={() => setIsSoundEnabled(!isSoundEnabled)} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={isSoundEnabled ? t('viewer.muteSound') : t('viewer.unmuteSound')}>{isSoundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}</button>
+              <button onClick={toggleFullscreen} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={t('viewer.fullscreen')}>{isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}</button>
+              <button onClick={isCaching ? undefined : handleSaveOffline} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={t('viewer.saveOffline')}>{isCaching ? <PackageOpen size={14} className="animate-pulse" /> : <DownloadCloud size={14} />}</button>
+              <button onClick={handleDownload} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={t('viewer.download')}><FileDown size={14} /></button>
+              <button onClick={handleShare} className="p-1.5 text-skin-control-text hover:bg-skin-control-hover rounded transition-colors" title={t('viewer.share')}><Share2 size={14} /></button>
             </div>
             <button onClick={() => setShowTopPanel(false)} className="p-1 rounded-full bg-skin-control-bg hover:bg-skin-control-hover text-skin-muted transition-colors"><ChevronUp size={14} /></button>
             <button onClick={onClose} className="p-1.5 rounded-lg bg-skin-primary/10 hover:bg-skin-primary/20 text-skin-primary transition-colors"><X size={16} /></button>
@@ -499,7 +502,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
         {isLoadingPdf && (
           <div className="flex flex-col items-center justify-center gap-3 text-skin-muted">
             <div className="w-12 h-12 border-4 border-skin-border border-t-skin-primary rounded-full animate-spin" />
-            <p className="text-sm">در حال بارگذاری PDF...</p>
+            <p className="text-sm">{t('viewer.loadingPdf')}</p>
           </div>
         )}
         {pdfError && <div className="text-red-500 text-sm">{pdfError}</div>}
@@ -547,7 +550,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
                     <Page key={index} number={index + 1}>
                       <SafeImage
                         src={pageUrl}
-                        alt={`صفحه ${index + 1}`}
+                        alt={t('viewer.pageAlt', { n: index + 1 })}
                         className="w-full h-full object-cover select-none"
                         draggable={false}
                         onContextMenu={(e) => e.preventDefault()}
@@ -578,8 +581,8 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
               <button onClick={handleDownload} className="p-2 text-skin-muted hover:text-skin-primary rounded"><FileDown size={16} /></button>
               <button onClick={handleShare} className="p-2 text-skin-muted hover:text-skin-primary rounded"><Share2 size={16} /></button>
             </div>
-            <span className="hidden md:block text-xs text-skin-muted">صفحه {currentPage + 1} از {totalPagesNum}</span>
-            <button onClick={() => setShowBottomPanel(false)} className="p-1.5 rounded-full bg-skin-control-bg hover:bg-skin-control-hover text-skin-muted transition-colors" title="جمع کردن نوار پایین"><ChevronDown size={14} /></button>
+            <span className="hidden md:block text-xs text-skin-muted">{t('viewer.pageOf', { current: currentPage + 1, total: totalPagesNum })}</span>
+            <button onClick={() => setShowBottomPanel(false)} className="p-1.5 rounded-full bg-skin-control-bg hover:bg-skin-control-hover text-skin-muted transition-colors" title={t('viewer.collapseBottom')}><ChevronDown size={14} /></button>
           </div>
 
           {/* Thumbnail strip */}
@@ -607,7 +610,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
                       onClick={() => goToPage(idx)}
                       className={`shrink-0 h-16 w-12 rounded border-2 overflow-hidden transition-all ${currentPage === idx ? 'border-skin-primary scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'}`}
                     >
-                      <SafeImage src={catalog.pages[idx]} alt={`ص ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                      <SafeImage src={catalog.pages[idx]} alt={t('viewer.pageAlt', { n: idx + 1 })} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     </button>
                   ));
                 })()
@@ -622,7 +625,7 @@ const BookViewer: React.FC<BookViewerProps> = ({ catalog, onClose, initialPage =
 
             return relatedCatalogs.length > 0 ? (
               <div className="px-4 py-3 border-t border-skin-border">
-                <p className="text-xs text-skin-muted mb-2 font-medium">ممکن است برایتان مفید باشد</p>
+                <p className="text-xs text-skin-muted mb-2 font-medium">{t('viewer.relatedCatalogs')}</p>
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                   {relatedCatalogs.map(rc => (
                     <button
