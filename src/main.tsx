@@ -6,6 +6,7 @@ import '@fontsource/vazirmatn/500.css';
 import '@fontsource/vazirmatn/700.css';
 import '@fontsource/vazirmatn/900.css';
 import './index.css';
+import './i18n';
 import App from './App';
 
 // PWA service worker registration

@@ -4,10 +4,12 @@ import { Toaster, toast } from 'react-hot-toast';
 import Fuse from 'fuse.js';
 import {
   BookOpen, Video, Search, Sun, Moon, Book, SlidersHorizontal,
-  LayoutGrid, List, ArrowUp, X, ChevronUp, Flag, Globe,
+  LayoutGrid, List, ArrowUp, X, ChevronUp, ChevronDown, Flag, Globe,
   BookMarked, Play, Languages, Clock, AlertTriangle, Heart, MessageCircle,
   Phone, MapPin, Factory, Briefcase, Bot, Hash
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { RTL_LANGS } from './i18n';
 
 const LinkedinIcon: React.FC<{ size?: number }> = ({ size = 15 }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
@@ -27,7 +29,7 @@ import CompanyInfo from './components/CompanyInfo';
 import ChatBot from './components/ChatBot';
 import PhoneDirectory from './components/PhoneDirectory';
 import CommandPalette, { PaletteCommand } from './components/CommandPalette';
-import { Catalog, Video as VideoType } from './types';
+import { Catalog, Video as VideoType, SupportedLang } from './types';
 import { dateToNumber, highlightText } from './utils/helpers';
 import { useCountUp } from './hooks/useCountUp';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
@@ -108,6 +110,7 @@ const SectionHeader: React.FC<{
 
 // ─── Stats Bar ────────────────────────────────────────────────────────────────
 const StatsBar: React.FC<{ catalogCount: number; videoCount: number; activeLangs: string[] }> = ({ catalogCount, videoCount, activeLangs }) => {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -130,13 +133,13 @@ const StatsBar: React.FC<{ catalogCount: number; videoCount: number; activeLangs
         <div className="flex items-center gap-2 text-skin-muted text-sm">
           <BookOpen size={15} className="text-skin-primary" />
           <span className="font-bold text-skin-text tabular-nums">{catCount}</span>
-          <span>کاتالوگ آموزشی</span>
+          <span>{t('stats.catalogs')}</span>
         </div>
         <div className="w-px h-4 bg-skin-border hidden sm:block" />
         <div className="flex items-center gap-2 text-skin-muted text-sm">
           <Play size={15} className="text-skin-primary" />
           <span className="font-bold text-skin-text tabular-nums">{vidCount}</span>
-          <span>ویدئوی آموزشی</span>
+          <span>{t('stats.videos')}</span>
         </div>
         {langFlags.length > 0 && (
           <>
@@ -160,17 +163,18 @@ const RecentlyViewed: React.FC<{
   onOpen: (catalog: Catalog) => void;
   onClear: () => void;
 }> = ({ catalogs, onOpen, onClear }) => {
+  const { t } = useTranslation();
   if (catalogs.length === 0) return null;
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-sm font-bold text-skin-text">
           <Clock size={14} className="text-skin-primary" />
-          آخرین مشاهده‌ها
+          {t('recent.title')}
         </div>
         <button onClick={onClear} className="text-xs text-skin-muted hover:text-skin-primary transition-colors flex items-center gap-1">
           <X size={12} />
-          پاک کردن
+          {t('recent.clear')}
         </button>
       </div>
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
@@ -197,12 +201,13 @@ const FavoritesRow: React.FC<{
   onOpen: (catalog: Catalog) => void;
   onToggleFavorite: (id: string) => void;
 }> = ({ catalogs, onOpen, onToggleFavorite }) => {
+  const { t } = useTranslation();
   if (catalogs.length === 0) return null;
   return (
     <div className="mb-8">
       <div className="flex items-center gap-2 mb-3 text-sm font-bold text-skin-text">
         <Heart size={14} className="text-red-500 fill-red-500" />
-        علاقه‌مندی‌ها
+        {t('favorites.title')}
       </div>
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
         {catalogs.map(cat => (
@@ -213,7 +218,7 @@ const FavoritesRow: React.FC<{
               <button
                 onClick={(e) => { e.stopPropagation(); onToggleFavorite(cat.id); }}
                 className="absolute top-1 left-1 p-1 rounded-full bg-white/80 text-red-500 hover:bg-white transition-colors"
-                title="حذف از علاقه‌مندی‌ها"
+                title={t('favorites.removeTooltip')}
               >
                 <Heart size={10} className="fill-red-500" />
               </button>
@@ -232,36 +237,40 @@ const EmptyState: React.FC<{
   hasCategory: boolean;
   onClearSearch: () => void;
   onClearCategory: () => void;
-}> = ({ searchTerm, hasCategory, onClearSearch, onClearCategory }) => (
-  <div className="col-span-full flex flex-col items-center justify-center py-16 text-center px-4">
-    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="mb-4 opacity-50">
-      <circle cx="35" cy="35" r="22" stroke="currentColor" strokeWidth="2.5" className="text-skin-border" />
-      <path d="M53 53L67 67" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-skin-border" />
-      <path d="M27 35h16M35 27v16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-skin-primary/40" />
-    </svg>
-    {searchTerm ? (
-      <>
-        <p className="text-skin-text font-bold text-base mb-1">نتیجه‌ای برای «{searchTerm}» یافت نشد</p>
-        <p className="text-skin-muted text-sm mb-4">عبارت جستجو را تغییر دهید یا جستجو را پاک کنید.</p>
-        <button onClick={onClearSearch} className="px-4 py-2 bg-skin-primary text-white rounded-xl text-sm font-bold hover:bg-skin-primary-hover transition-colors">
-          پاک کردن جستجو
-        </button>
-      </>
-    ) : hasCategory ? (
-      <>
-        <p className="text-skin-text font-bold text-base mb-1">کاتالوگی در این دسته‌بندی یافت نشد</p>
-        <button onClick={onClearCategory} className="mt-3 px-4 py-2 bg-skin-primary text-white rounded-xl text-sm font-bold hover:bg-skin-primary-hover transition-colors">
-          مشاهده همه دسته‌ها
-        </button>
-      </>
-    ) : (
-      <p className="text-skin-text font-bold text-base">هیچ کاتالوگی یافت نشد</p>
-    )}
-  </div>
-);
+}> = ({ searchTerm, hasCategory, onClearSearch, onClearCategory }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="col-span-full flex flex-col items-center justify-center py-16 text-center px-4">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="mb-4 opacity-50">
+        <circle cx="35" cy="35" r="22" stroke="currentColor" strokeWidth="2.5" className="text-skin-border" />
+        <path d="M53 53L67 67" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-skin-border" />
+        <path d="M27 35h16M35 27v16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-skin-primary/40" />
+      </svg>
+      {searchTerm ? (
+        <>
+          <p className="text-skin-text font-bold text-base mb-1">{t('empty.noResults', { term: searchTerm })}</p>
+          <p className="text-skin-muted text-sm mb-4">{t('empty.noResultsHint')}</p>
+          <button onClick={onClearSearch} className="px-4 py-2 bg-skin-primary text-white rounded-xl text-sm font-bold hover:bg-skin-primary-hover transition-colors">
+            {t('empty.clearSearch')}
+          </button>
+        </>
+      ) : hasCategory ? (
+        <>
+          <p className="text-skin-text font-bold text-base mb-1">{t('empty.noCategory')}</p>
+          <button onClick={onClearCategory} className="mt-3 px-4 py-2 bg-skin-primary text-white rounded-xl text-sm font-bold hover:bg-skin-primary-hover transition-colors">
+            {t('empty.showAll')}
+          </button>
+        </>
+      ) : (
+        <p className="text-skin-text font-bold text-base">{t('empty.noCatalogs')}</p>
+      )}
+    </div>
+  );
+};
 
 // ─── Scroll To Top Button (Fix 2.10) ─────────────────────────────────────────
 const ScrollToTop: React.FC<{ scrollProgress: number }> = ({ scrollProgress }) => {
+  const { t } = useTranslation();
   const radius = 20;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (scrollProgress / 100) * circumference;
@@ -272,7 +281,7 @@ const ScrollToTop: React.FC<{ scrollProgress: number }> = ({ scrollProgress }) =
       className="relative w-12 h-12 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-skin-primary rounded-full"
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
-      aria-label="بازگشت به بالای صفحه"
+      aria-label={t('scrollTop')}
     >
       <svg width="48" height="48" className="absolute inset-0 -rotate-90">
         <circle cx="24" cy="24" r={radius} fill="none" stroke="var(--color-border)" strokeWidth="2.5" />
@@ -291,6 +300,62 @@ const ScrollToTop: React.FC<{ scrollProgress: number }> = ({ scrollProgress }) =
         <ArrowUp size={14} className="text-skin-primary" />
       </div>
     </motion.button>
+  );
+};
+
+// ─── Language Switcher ────────────────────────────────────────────────────────
+const LangSwitcher: React.FC<{ currentLang: SupportedLang; onChangeLang: (lang: SupportedLang) => void }> = ({ currentLang, onChangeLang }) => {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const current = LANG_OPTIONS.find(l => l.code === currentLang) ?? LANG_OPTIONS[0];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        aria-label={t('lang.select')}
+        aria-expanded={open}
+        className="flex items-center gap-1.5 h-8 px-2.5 rounded-xl bg-skin-control-bg border border-skin-border text-xs font-bold text-skin-control-text hover:border-skin-primary/40 transition-colors"
+      >
+        <span>{current.flag}</span>
+        <span className="hidden sm:inline">{current.code.toUpperCase()}</span>
+        <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 4, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.97 }}
+            transition={{ duration: 0.12 }}
+            className="absolute top-full mt-1.5 end-0 bg-skin-card border border-skin-border rounded-xl shadow-lg overflow-hidden z-50 min-w-[130px]"
+          >
+            {LANG_OPTIONS.map(lang => (
+              <button
+                key={lang.code}
+                onClick={() => { onChangeLang(lang.code as SupportedLang); setOpen(false); }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors hover:bg-skin-control-bg ${currentLang === lang.code ? 'text-skin-primary bg-skin-primary/5' : 'text-skin-control-text'}`}
+              >
+                <span>{lang.flag}</span>
+                <span>{lang.label}</span>
+                {currentLang === lang.code && <span className="ms-auto w-1.5 h-1.5 rounded-full bg-skin-primary" />}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
@@ -394,10 +459,10 @@ const Footer: React.FC<{ theme: Theme; setTheme: (t: Theme) => void }> = ({ them
 
 // ─── Main Inner App ───────────────────────────────────────────────────────────
 const SORT_OPTIONS = [
-  { value: 'default', label: 'پیش‌فرض' },
-  { value: 'date_desc', label: 'جدیدترین' },
-  { value: 'date_asc', label: 'قدیمی‌ترین' },
-  { value: 'alpha', label: 'الفبایی' },
+  { value: 'default', labelKey: 'filter.sort.default' },
+  { value: 'date_desc', labelKey: 'filter.sort.newest' },
+  { value: 'date_asc', labelKey: 'filter.sort.oldest' },
+  { value: 'alpha', labelKey: 'filter.sort.alpha' },
 ];
 
 const LANG_OPTIONS = [
@@ -436,6 +501,18 @@ const InnerApp: React.FC = () => {
       <p>خطا در نمایش بخش «{section}»</p>
     </div>
   );
+
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language as SupportedLang;
+  const isRtl = RTL_LANGS.includes(currentLang);
+
+  const handleLangChange = useCallback((lang: SupportedLang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('nafas_lang', lang);
+    const dir = RTL_LANGS.includes(lang) ? 'rtl' : 'ltr';
+    document.documentElement.setAttribute('dir', dir);
+    document.documentElement.setAttribute('lang', lang);
+  }, [i18n]);
 
   const { catalogs, videos, isLoading, error } = useCatalogs();
   const { theme, setTheme } = useTheme();
@@ -581,14 +658,14 @@ const InnerApp: React.FC = () => {
     const handleUpdate = (e: Event) => {
       const { update } = (e as CustomEvent).detail;
       toast(
-        (t) => (
+        (toastInstance) => (
           <div className="flex items-center gap-3 text-sm">
-            <span>نسخه جدیدی آماده است.</span>
+            <span>{t('pwa.updateReady')}</span>
             <button
-              onClick={() => { update?.(); toast.dismiss(t.id); }}
+              onClick={() => { update?.(); toast.dismiss(toastInstance.id); }}
               className="shrink-0 px-3 py-1 bg-skin-primary text-white rounded-lg text-xs font-bold hover:bg-skin-primary-hover transition-colors"
             >
-              بروزرسانی
+              {t('pwa.updateBtn')}
             </button>
           </div>
         ),
@@ -680,6 +757,11 @@ const InnerApp: React.FC = () => {
     const langs = new Set(catalogs.map(c => c.language ?? 'fa'));
     return Array.from(langs) as ('fa' | 'en' | 'ar' | 'ru')[];
   }, [catalogs]);
+
+  // Only show language filter buttons for languages that have catalogs
+  const availableLangOptions = useMemo(() => {
+    return LANG_OPTIONS.filter(l => availableLangs.includes(l.code));
+  }, [availableLangs]);
 
   // Processed catalogs
   // SURPRISE-05: Fuzzy search with Fuse.js
@@ -819,9 +901,9 @@ const InnerApp: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-skin-base" dir="rtl">
+    <div className="min-h-screen bg-skin-base" dir={isRtl ? 'rtl' : 'ltr'}>
       <ScrollProgressBar progress={scrollProgress} />
-      <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl', fontSize: '13px' } }} />
+      <Toaster position="top-center" toastOptions={{ style: { fontFamily: 'Vazirmatn, sans-serif', direction: isRtl ? 'rtl' : 'ltr', fontSize: '13px' } }} />
 
       {/* SURPRISE-01: Command Palette */}
       <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} commands={paletteCommands} />
@@ -836,7 +918,7 @@ const InnerApp: React.FC = () => {
             className="fixed top-[2px] inset-x-0 z-[99] bg-amber-500 text-white text-center text-xs py-1.5 font-bold flex items-center justify-center gap-2"
           >
             <span>📡</span>
-            آفلاین هستید — برخی قابلیت‌ها در دسترس نیست
+            {t('offline')}
           </motion.div>
         )}
       </AnimatePresence>
@@ -854,11 +936,11 @@ const InnerApp: React.FC = () => {
           <button
             onClick={() => setLogoClicks(c => c + 1)}
             className="flex items-center gap-2.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-skin-primary rounded-lg"
-            aria-label="نفس زیست فارمد"
+            aria-label={t('header.logoAriaLabel')}
           >
-            <img src={theme === 'dark' ? LOGO_URL_DARK : LOGO_URL} alt="نفس زیست فارمد" className="h-9 w-auto object-contain" />
+            <img src={theme === 'dark' ? LOGO_URL_DARK : LOGO_URL} alt={t('header.logoAriaLabel')} className="h-9 w-auto object-contain" />
             <div className="hidden sm:block">
-              <p className="text-[10px] text-skin-primary font-bold leading-none">مراقب شما در هر نفس</p>
+              <p className="text-[10px] text-skin-primary font-bold leading-none">{t('header.tagline')}</p>
             </div>
           </button>
 
@@ -870,7 +952,7 @@ const InnerApp: React.FC = () => {
               type="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="جستجو... ( / )"
+              placeholder={t('header.searchPlaceholder')}
               className={`w-full bg-skin-control-bg border rounded-xl py-2 pr-8 pl-3 text-sm outline-none transition-all focus:ring-2 focus:ring-skin-primary/20 focus:border-skin-primary ${urlCatNotFound ? 'border-amber-400 ring-2 ring-amber-200 animate-pulse' : 'border-skin-border'}`}
             />
           </div>
@@ -879,18 +961,18 @@ const InnerApp: React.FC = () => {
           <div className="flex items-center gap-2 mr-auto">
             {/* Fix 2.13: Animated theme toggle */}
             <div className="flex items-center gap-1 bg-skin-control-bg rounded-xl p-1">
-              {([['light', <Sun size={13} />, 'روشن'], ['dark', <Moon size={13} />, 'تاریک'], ['reading', <Book size={13} />, 'مطالعه']] as [Theme, React.ReactNode, string][]).map(([t, icon, label]) => (
+              {([['light', <Sun size={13} />, t('theme.light')], ['dark', <Moon size={13} />, t('theme.dark')], ['reading', <Book size={13} />, t('theme.reading')]] as [Theme, React.ReactNode, string][]).map(([themeVal, icon, label]) => (
                 <button
-                  key={t}
-                  onClick={() => setTheme(t)}
+                  key={themeVal}
+                  onClick={() => setTheme(themeVal)}
                   title={label}
                   aria-label={label}
-                  className={`relative p-1.5 rounded-lg transition-all ${theme === t ? 'bg-skin-card text-skin-primary shadow-sm' : 'text-skin-muted hover:text-skin-text'}`}
+                  className={`relative p-1.5 rounded-lg transition-all ${theme === themeVal ? 'bg-skin-card text-skin-primary shadow-sm' : 'text-skin-muted hover:text-skin-text'}`}
                 >
                   <AnimatePresence mode="wait">
-                    {theme === t && (
+                    {theme === themeVal && (
                       <motion.div
-                        key={t}
+                        key={themeVal}
                         initial={{ scale: 0.5, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.5, opacity: 0 }}
@@ -903,7 +985,8 @@ const InnerApp: React.FC = () => {
               ))}
             </div>
 
-
+            {/* Language switcher */}
+            <LangSwitcher currentLang={currentLang} onChangeLang={handleLangChange} />
           </div>
         </div>
 
@@ -916,7 +999,7 @@ const InnerApp: React.FC = () => {
               type="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="جستجو... ( / )"
+              placeholder={t('header.searchPlaceholder')}
               className={`w-full bg-skin-control-bg border rounded-xl py-2 pr-8 pl-3 text-sm outline-none focus:border-skin-primary ${urlCatNotFound ? 'border-amber-400 animate-pulse' : 'border-skin-border'}`}
             />
           </div>
@@ -933,7 +1016,7 @@ const InnerApp: React.FC = () => {
             className="mx-auto lg:w-[90%] lg:max-w-[1800px] px-3 sm:px-4 mt-3"
           >
             <div className="flex items-center justify-between gap-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 rounded-xl px-4 py-3 text-sm">
-              <p>کاتالوگ مورد نظر یافت نشد. می‌توانید با جستجو آن را پیدا کنید.</p>
+              <p>{t('error.catNotFound')}</p>
               <button onClick={() => setUrlCatNotFound(false)} className="shrink-0 text-amber-600 hover:text-amber-800"><X size={16} /></button>
             </div>
           </motion.div>
@@ -947,7 +1030,7 @@ const InnerApp: React.FC = () => {
           <div className="mb-4">
             <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-xl px-4 py-3 text-sm">
               <AlertTriangle size={14} className="shrink-0" />
-              <p>خطا در بارگذاری داده‌ها — از داده‌های محلی استفاده می‌شود.</p>
+              <p>{t('error.dataLoad')}</p>
             </div>
           </div>
         )}
@@ -979,7 +1062,7 @@ const InnerApp: React.FC = () => {
         {/* ─── CATALOGS SECTION ─────────────────────────────────────────────── */}
         <ErrorBoundary fallback={<SectionError section="کاتالوگ‌ها" />}>
           <section id="catalogs" ref={catalogsSectionRef} className="mb-12">
-            <SectionHeader icon={<BookOpen size={20} />} title="کاتالوگ‌های آموزشی" count={processedCatalogs.length} />
+            <SectionHeader icon={<BookOpen size={20} />} title={t('sections.catalogs')} count={processedCatalogs.length} />
 
           {/* Filters row */}
           <div className="flex flex-col gap-3 mb-5">
@@ -996,7 +1079,7 @@ const InnerApp: React.FC = () => {
                     onClick={() => setSelectedCategory(null)}
                     className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border-2 ${!selectedCategory ? 'bg-skin-primary text-white border-skin-primary border-r-4' : 'bg-skin-control-bg text-skin-control-text border-skin-border hover:border-skin-primary/30'}`}
                   >
-                    همه
+                    {t('filter.all')}
                     <span className="mr-1 opacity-60">({catalogs.length})</span>
                   </button>
                   {categories.map(cat => (
@@ -1012,29 +1095,31 @@ const InnerApp: React.FC = () => {
                 </div>
               </div>
 
-              {/* Language quick filter — shows all 4 supported languages */}
-              <div className="flex gap-1 shrink-0">
-                {LANG_OPTIONS.map(({ code, flag, ariaLabel }) => (
-                  <button
-                    key={code}
-                    onClick={() => setLangFilter(langFilter === code ? null : code)}
-                    title={ariaLabel}
-                    aria-label={ariaLabel}
-                    aria-pressed={langFilter === code}
-                    className={`h-8 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === code ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
-                  >
-                    <span aria-hidden>{flag}</span>
-                    <span className="hidden sm:inline">{code.toUpperCase()}</span>
-                  </button>
-                ))}
-              </div>
+              {/* Language quick filter — only shown for languages with available catalogs */}
+              {availableLangOptions.length > 1 && (
+                <div className="flex gap-1 shrink-0">
+                  {availableLangOptions.map(({ code, flag, ariaLabel }) => (
+                    <button
+                      key={code}
+                      onClick={() => setLangFilter(langFilter === code ? null : code)}
+                      title={ariaLabel}
+                      aria-label={ariaLabel}
+                      aria-pressed={langFilter === code}
+                      className={`h-8 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === code ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
+                    >
+                      <span aria-hidden>{flag}</span>
+                      <span className="hidden sm:inline">{code.toUpperCase()}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Sort + display mode */}
             <div className="flex items-center gap-2 justify-between">
               {/* Fix 1.14: aria-live for results count */}
               <output aria-live="polite" className="text-xs text-skin-muted">
-                {processedCatalogs.length} کاتالوگ
+                {t('filter.catalogCount', { count: processedCatalogs.length })}
               </output>
               <div className="flex items-center gap-2">
                 <select
@@ -1042,20 +1127,20 @@ const InnerApp: React.FC = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="text-xs bg-skin-control-bg border border-skin-border rounded-xl px-2 py-1.5 outline-none focus:border-skin-primary text-skin-control-text"
                 >
-                  {SORT_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                  {SORT_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>)}
                 </select>
                 <div className="flex gap-1 bg-skin-control-bg rounded-xl p-1">
                   <button
                     onClick={() => setDisplayMode('grid')}
                     className={`p-1.5 rounded-lg transition-all ${displayMode === 'grid' ? 'bg-skin-card text-skin-primary shadow-sm' : 'text-skin-muted hover:text-skin-text'}`}
-                    aria-label="نمایش گرید"
+                    aria-label={t('filter.grid')}
                   >
                     <LayoutGrid size={14} />
                   </button>
                   <button
                     onClick={() => setDisplayMode('list')}
                     className={`p-1.5 rounded-lg transition-all ${displayMode === 'list' ? 'bg-skin-card text-skin-primary shadow-sm' : 'text-skin-muted hover:text-skin-text'}`}
-                    aria-label="نمایش لیست"
+                    aria-label={t('filter.list')}
                   >
                     <List size={14} />
                   </button>
@@ -1101,7 +1186,7 @@ const InnerApp: React.FC = () => {
         <ErrorBoundary fallback={<SectionError section="ویدئوها" />}>
           {videos.length > 0 && (
             <section id="videos" ref={videosSectionRef} className="mb-12">
-              <SectionHeader icon={<Video size={20} />} title="ویدئوهای آموزشی" count={videos.length} />
+              <SectionHeader icon={<Video size={20} />} title={t('sections.videos')} count={videos.length} />
 
               {/* BUG-V4-08: Video search feature */}
               <div className="flex items-center gap-2 mb-4">
@@ -1110,7 +1195,7 @@ const InnerApp: React.FC = () => {
                   <input
                     value={videoSearch}
                     onChange={e => setVideoSearch(e.target.value)}
-                    placeholder="جستجو در ویدئوها..."
+                    placeholder={t('filter.videoSearch')}
                     className="w-full bg-skin-control-bg border border-skin-border rounded-xl py-1.5 pr-8 pl-3 text-xs outline-none focus:border-skin-primary"
                   />
                 </div>
@@ -1133,8 +1218,8 @@ const InnerApp: React.FC = () => {
                   <Video size={40} className="text-skin-border mb-3 opacity-50" />
                   <p className="text-skin-muted text-sm">
                     {langFilter && !videoSearch
-                      ? `ویدئویی به این زبان موجود نیست`
-                      : 'ویدئویی با این معیار یافت نشد'}
+                      ? t('empty.noVideosForLang')
+                      : t('empty.noVideos')}
                   </p>
                 </div>
               )}
@@ -1161,10 +1246,10 @@ const InnerApp: React.FC = () => {
       {/* Stays above the chat backdrop (un-dimmed) while the chat is open. */}
       <nav id="mobile-nav" className={`md:hidden fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 flex items-center gap-1 bg-skin-card/90 backdrop-blur-xl border border-skin-border rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.16)] px-2 py-1.5 ${chatOpen ? 'z-[70]' : 'z-40'}`}>
         {([
-          { key: 'catalogs', icon: <BookOpen size={18} />, label: 'کاتالوگ', onClick: () => { setChatOpen(false); catalogsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
-          { key: 'videos', icon: <Video size={18} />, label: 'ویدئو', onClick: () => { setChatOpen(false); videosSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
-          { key: 'products', icon: <BookMarked size={18} />, label: 'محصولات', onClick: () => { setChatOpen(false); productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
-          { key: 'chat', icon: <MessageCircle size={18} />, label: 'گفت‌وگو', onClick: () => setChatOpen(o => !o) },
+          { key: 'catalogs', icon: <BookOpen size={18} />, label: t('nav.catalogs'), onClick: () => { setChatOpen(false); catalogsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
+          { key: 'videos', icon: <Video size={18} />, label: t('nav.videos'), onClick: () => { setChatOpen(false); videosSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
+          { key: 'products', icon: <BookMarked size={18} />, label: t('nav.products'), onClick: () => { setChatOpen(false); productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }); } },
+          { key: 'chat', icon: <MessageCircle size={18} />, label: t('nav.chat'), onClick: () => setChatOpen(o => !o) },
         ] as { key: string; icon: React.ReactNode; label: string; onClick: () => void }[]).map(item => {
           // While the chat is open, only the chat icon is highlighted; the rest reset.
           const isActive = chatOpen ? item.key === 'chat' : activeSection === item.key;
@@ -1230,7 +1315,7 @@ const InnerApp: React.FC = () => {
       <button
         type="button"
         onClick={() => setChatOpen(true)}
-        aria-label="دستیار گفت‌وگو"
+        aria-label={t('assistant')}
         className="hidden md:flex fixed md:bottom-6 md:left-6 z-30 w-14 h-14 rounded-full bg-skin-primary hover:bg-skin-primary-hover text-white shadow-[0_10px_30px_rgba(182,22,21,0.35)] items-center justify-center transition-all hover:scale-105 active:scale-95"
       >
         <MessageCircle size={24} />
