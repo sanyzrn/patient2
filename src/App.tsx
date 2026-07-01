@@ -499,7 +499,7 @@ const InnerApp: React.FC = () => {
   const SectionError: React.FC<{ section: string }> = ({ section }) => (
     <div className="py-8 text-center text-skin-muted text-sm">
       <AlertTriangle size={20} className="mx-auto mb-2 text-amber-500" />
-      <p>خطا در نمایش بخش «{section}»</p>
+      <p>{t('error.sectionError', { section })}</p>
     </div>
   );
 
@@ -854,31 +854,31 @@ const InnerApp: React.FC = () => {
   // Build command palette commands
   const paletteCommands: PaletteCommand[] = useMemo(() => [
     // Theme commands
-    { id: 'theme-light', label: 'پوسته روشن', group: 'تم', action: () => setTheme('light'), keywords: ['روشن', 'light'] },
-    { id: 'theme-dark', label: 'پوسته تاریک', group: 'تم', action: () => setTheme('dark'), keywords: ['تاریک', 'dark'] },
-    { id: 'theme-reading', label: 'پوسته مطالعه', group: 'تم', action: () => setTheme('reading'), keywords: ['مطالعه', 'reading'] },
+    { id: 'theme-light', label: t('commandPalette.themeLight'), group: t('commandPalette.groupTheme'), action: () => setTheme('light'), keywords: ['روشن', 'light'] },
+    { id: 'theme-dark', label: t('commandPalette.themeDark'), group: t('commandPalette.groupTheme'), action: () => setTheme('dark'), keywords: ['تاریک', 'dark'] },
+    { id: 'theme-reading', label: t('commandPalette.themeReading'), group: t('commandPalette.groupTheme'), action: () => setTheme('reading'), keywords: ['مطالعه', 'reading'] },
 
     // Navigation commands
-    { id: 'go-catalogs', label: 'رفتن به کاتالوگ‌ها', group: 'ناوبری', action: () => catalogsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }), keywords: ['کاتالوگ'] },
-    { id: 'go-videos', label: 'رفتن به ویدئوها', group: 'ناوبری', action: () => videosSectionRef.current?.scrollIntoView({ behavior: 'smooth' }), keywords: ['ویدئو', 'video'] },
-    { id: 'go-products', label: 'رفتن به محصولات', group: 'ناوبری', action: () => productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }), keywords: ['محصول'] },
+    { id: 'go-catalogs', label: t('commandPalette.goCatalogs'), group: t('commandPalette.groupNav'), action: () => catalogsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }), keywords: ['کاتالوگ'] },
+    { id: 'go-videos', label: t('commandPalette.goVideos'), group: t('commandPalette.groupNav'), action: () => videosSectionRef.current?.scrollIntoView({ behavior: 'smooth' }), keywords: ['ویدئو', 'video'] },
+    { id: 'go-products', label: t('commandPalette.goProducts'), group: t('commandPalette.groupNav'), action: () => productsSectionRef.current?.scrollIntoView({ behavior: 'smooth' }), keywords: ['محصول'] },
 
     // Admin commands
-    { id: 'admin-panel', label: 'باز کردن پنل مدیریت', group: 'مدیریت', action: () => { enterAdmin(); setShowCommandPalette(false); }, keywords: ['مدیریت', 'admin'] },
+    { id: 'admin-panel', label: t('commandPalette.openAdmin'), group: t('commandPalette.groupAdmin'), action: () => { enterAdmin(); setShowCommandPalette(false); }, keywords: ['مدیریت', 'admin'] },
 
     // Clear commands
-    { id: 'clear-recent', label: 'پاک کردن تاریخچه مشاهده', group: 'پاکسازی', action: () => { clearRecent(); toast.success('تاریخچه پاک شد'); }, keywords: ['تاریخچه', 'recent'] },
-    { id: 'clear-favorites', label: 'پاک کردن علاقه‌مندی‌ها', group: 'پاکسازی', action: () => { clearFavorites(); toast.success('علاقه‌مندی‌ها پاک شد'); }, keywords: ['علاقه', 'favorites'] },
+    { id: 'clear-recent', label: t('commandPalette.clearRecent'), group: t('commandPalette.groupClear'), action: () => { clearRecent(); toast.success(t('commandPalette.historyCleared')); }, keywords: ['تاریخچه', 'recent'] },
+    { id: 'clear-favorites', label: t('commandPalette.clearFavorites'), group: t('commandPalette.groupClear'), action: () => { clearFavorites(); toast.success(t('commandPalette.favoritesCleared')); }, keywords: ['علاقه', 'favorites'] },
 
     // Catalog quick open
     ...catalogs.slice(0, 8).map(cat => ({
       id: `cat-${cat.id}`,
       label: cat.title,
-      group: 'کاتالوگ‌ها',
+      group: t('commandPalette.groupCatalogs'),
       action: () => { handleOpenCatalog(cat); setShowCommandPalette(false); },
       keywords: [cat.title, cat.category],
     })),
-  ], [catalogs, handleOpenCatalog, clearRecent, clearFavorites, setTheme, enterAdmin, setShowCommandPalette]);
+  ], [catalogs, handleOpenCatalog, clearRecent, clearFavorites, setTheme, enterAdmin, setShowCommandPalette, t]);
 
   // -- Admin views --
   if (viewMode === 'admin-login') {
@@ -1061,7 +1061,7 @@ const InnerApp: React.FC = () => {
         )}
 
         {/* ─── CATALOGS SECTION ─────────────────────────────────────────────── */}
-        <ErrorBoundary fallback={<SectionError section="کاتالوگ‌ها" />}>
+        <ErrorBoundary fallback={<SectionError section={t('sectionNames.catalogs')} />}>
           <section id="catalogs" ref={catalogsSectionRef} className="mb-12">
             <SectionHeader icon={<BookOpen size={20} />} title={t('sections.catalogs')} count={processedCatalogs.length} />
 
@@ -1184,7 +1184,7 @@ const InnerApp: React.FC = () => {
         </ErrorBoundary>
 
         {/* ─── VIDEOS SECTION ───────────────────────────────────────────────── */}
-        <ErrorBoundary fallback={<SectionError section="ویدئوها" />}>
+        <ErrorBoundary fallback={<SectionError section={t('sectionNames.videos')} />}>
           {videos.length > 0 && (
             <section id="videos" ref={videosSectionRef} className="mb-12">
               <SectionHeader icon={<Video size={20} />} title={t('sections.videos')} count={videos.length} />
@@ -1229,12 +1229,12 @@ const InnerApp: React.FC = () => {
         </ErrorBoundary>
 
         {/* ─── PRODUCTS SECTION (below catalogs & videos) ───────────────────── */}
-        <ErrorBoundary fallback={<SectionError section="محصولات" />}>
+        <ErrorBoundary fallback={<SectionError section={t('sectionNames.products')} />}>
           <ProductsSection catalogs={catalogs} onOpenCatalog={handleOpenCatalog} sectionRef={productsSectionRef} />
         </ErrorBoundary>
 
         {/* ─── COMPANY INFO (about · mission · advantages · slogan) ─────────── */}
-        <ErrorBoundary fallback={<SectionError section="درباره شرکت" />}>
+        <ErrorBoundary fallback={<SectionError section={t('sectionNames.about')} />}>
           <CompanyInfo />
         </ErrorBoundary>
 

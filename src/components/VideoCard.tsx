@@ -2,6 +2,7 @@ import React from 'react';
 import { Video } from '../types';
 import { Play, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import SafeImage from './SafeImage';
 
 interface VideoCardProps {
@@ -10,6 +11,7 @@ interface VideoCardProps {
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({ video, onClick }) => {
+  const { t } = useTranslation();
   return (
     <motion.div
       whileHover={{ rotateX: -1, scale: 1.01 }}
@@ -23,7 +25,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onClick }) => {
       }}
       role="button"
       tabIndex={0}
-      aria-label={`پخش ویدئو ${video.title}`}
+      aria-label={t('videoCard.playAria', { title: video.title })}
       className="group bg-skin-card border border-skin-border rounded-2xl overflow-hidden cursor-pointer
         shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)]
         hover:border-skin-primary/30 focus-visible:outline-none focus-visible:ring-2

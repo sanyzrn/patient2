@@ -8,6 +8,13 @@ import type { SupportedLang } from '../types';
 
 export const RTL_LANGS: SupportedLang[] = ['fa', 'ar'];
 
+export const SPEECH_LANG_MAP: Record<SupportedLang, string> = {
+  fa: 'fa-IR',
+  en: 'en-US',
+  ar: 'ar-SA',
+  ru: 'ru-RU',
+};
+
 const savedLang = (() => {
   try {
     return (localStorage.getItem('nafas_lang') as SupportedLang | null) ?? 'fa';
