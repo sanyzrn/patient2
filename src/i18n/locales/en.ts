@@ -46,6 +46,7 @@ const en = {
       alpha: 'Alphabetical',
     },
     catalogCount: '{{count}} catalogs',
+    byLanguageAria: 'Filter {{lang}}',
     videoSearch: 'Search videos...',
     grid: 'Grid view',
     list: 'List view',
@@ -255,6 +256,14 @@ const en = {
     message: 'Unfortunately, an unexpected error occurred. You can try again or reload the page.',
     retry: 'Try Again',
     reload: 'Reload Page',
+  },
+  streak: {
+    milestone3: '🔥 3 days in a row! You\'re building a habit!',
+    milestone7: '🔥 7 days in a row! A full week!',
+    milestone14: '🔥 14 days in a row! You\'re a role model!',
+    milestone30: '🔥 1 month straight! Amazing!',
+    milestone60: '🔥 60 days! Superhero strength!',
+    milestone100: '🔥 100 days! Legendary!',
   },
   videoPlayer: {
     playAria: 'Play video: {{title}}',

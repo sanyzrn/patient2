@@ -467,10 +467,10 @@ const SORT_OPTIONS = [
 ];
 
 const LANG_OPTIONS = [
-  { code: 'fa', flag: '🇮🇷', label: 'فارسی', ariaLabel: 'فیلتر فارسی' },
-  { code: 'en', flag: '🇬🇧', label: 'English', ariaLabel: 'فیلتر انگلیسی' },
-  { code: 'ar', flag: '🇸🇦', label: 'العربية', ariaLabel: 'فیلتر عربی' },
-  { code: 'ru', flag: '🇷🇺', label: 'Русский', ariaLabel: 'فیلتر روسی' },
+  { code: 'fa', flag: '🇮🇷', label: 'فارسی' },
+  { code: 'en', flag: '🇬🇧', label: 'English' },
+  { code: 'ar', flag: '🇸🇦', label: 'العربية' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский' },
 ] as const;
 
 function useRecentCatalogs() {
@@ -710,10 +710,10 @@ const InnerApp: React.FC = () => {
     setOpenCatalogPage(page);
     addRecent(catalog.id);
     recordRead(); // SURPRISE-03: Track reading streak
-    const milestone = checkStreakMilestone(streak);
+    const milestone = checkStreakMilestone(streak, t);
     if (milestone) toast.success(milestone);
     window.history.pushState({}, '', `${window.location.pathname}?cat=${catalog.id}&page=${page + 1}`);
-  }, [addRecent, recordRead, streak]);
+  }, [addRecent, recordRead, streak, t]);
 
   const handleCloseViewer = useCallback(() => {
     setOpenCatalog(null);
@@ -1099,12 +1099,12 @@ const InnerApp: React.FC = () => {
               {/* Language quick filter — only shown for languages with available catalogs */}
               {availableLangOptions.length > 1 && (
                 <div className="flex gap-1 shrink-0">
-                  {availableLangOptions.map(({ code, flag, ariaLabel }) => (
+                  {availableLangOptions.map(({ code, flag, label }) => (
                     <button
                       key={code}
                       onClick={() => setLangFilter(langFilter === code ? null : code)}
-                      title={ariaLabel}
-                      aria-label={ariaLabel}
+                      title={t('filter.byLanguageAria', { lang: label })}
+                      aria-label={t('filter.byLanguageAria', { lang: label })}
                       aria-pressed={langFilter === code}
                       className={`h-8 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all border-2 ${langFilter === code ? 'bg-skin-primary/10 border-skin-primary text-skin-primary' : 'border-skin-border text-skin-control-text hover:border-skin-primary/30'}`}
                     >
