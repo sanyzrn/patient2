@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
+import type { TFunction } from 'i18next';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 
 export interface StreakData {
@@ -74,17 +75,16 @@ function getDefaultStreak(): StreakData {
  * Check if we should show a milestone toast
  * Returns the milestone message if achieved, null otherwise
  */
-export function checkStreakMilestone(streak: StreakData): string | null {
-  const milestones = [3, 7, 14, 30, 60, 100];
-  
-  if (milestones.includes(streak.currentStreak)) {
-    if (streak.currentStreak === 3) return '🔥 ۳ روز متوالی! دارید عادت می‌کنید!';
-    if (streak.currentStreak === 7) return '🔥 ۷ روز متوالی! هفته داشتی!';
-    if (streak.currentStreak === 14) return '🔥 ۱۴ روز متوالی! نمونه ایده‌آل هستید!';
-    if (streak.currentStreak === 30) return '🔥 ۱ ماه متوالی! فوق‌العاده‌اید!';
-    if (streak.currentStreak === 60) return '🔥 ۶۰ روز! نیروی ابرقهرمان!';
-    if (streak.currentStreak === 100) return '🔥 ۱۰۰ روز! افسانه‌ای!';
-  }
-  
-  return null;
+export function checkStreakMilestone(streak: StreakData, t: TFunction): string | null {
+  const milestoneKeys: Record<number, string> = {
+    3: 'streak.milestone3',
+    7: 'streak.milestone7',
+    14: 'streak.milestone14',
+    30: 'streak.milestone30',
+    60: 'streak.milestone60',
+    100: 'streak.milestone100',
+  };
+
+  const key = milestoneKeys[streak.currentStreak];
+  return key ? t(key) : null;
 }

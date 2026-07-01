@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Video } from '../types';
 import { X, Calendar, Tv2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -10,6 +11,7 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const [pipAvailable, setPipAvailable] = useState(false);
@@ -76,7 +78,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-label={`پخش ویدئو: ${video.title}`}
+        aria-label={t('videoPlayer.playAria', { title: video.title })}
       >
         {/* Header */}
         <div className="flex items-center justify-between gap-3 p-4 border-b border-skin-border flex-wrap">
@@ -93,8 +95,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
                       ? 'bg-skin-primary text-white'
                       : 'text-skin-muted hover:text-skin-text hover:bg-skin-control-hover'
                   }`}
-                  title={`سرعت ${speed}×`}
-                  aria-label={`سرعت ${speed}×`}
+                  title={t('videoPlayer.speedAria', { speed })}
+                  aria-label={t('videoPlayer.speedAria', { speed })}
                 >
                   {speed}×
                 </button>
@@ -104,8 +106,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
             {pipAvailable && (
               <button
                 onClick={togglePip}
-                aria-label={pipActive ? 'خروج از تصویر در تصویر' : 'تصویر در تصویر'}
-                title={pipActive ? 'خروج از تصویر در تصویر' : 'تصویر در تصویر'}
+                aria-label={pipActive ? t('videoPlayer.pipExit') : t('videoPlayer.pipEnter')}
+                title={pipActive ? t('videoPlayer.pipExit') : t('videoPlayer.pipEnter')}
                 className={`p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-skin-primary ${
                   pipActive ? 'bg-skin-primary text-white' : 'bg-skin-control-bg text-skin-muted hover:text-skin-primary hover:bg-skin-control-hover'
                 }`}
@@ -115,7 +117,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
             )}
             <button
               onClick={onClose}
-              aria-label="بستن"
+              aria-label={t('chatbot.close')}
               className="p-2 rounded-lg bg-skin-control-bg hover:bg-skin-control-hover text-skin-muted hover:text-skin-text transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-skin-primary"
             >
               <X size={18} />
@@ -128,7 +130,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
           {videoError ? (
             <div className="flex items-center justify-center w-full h-[400px] bg-black/50 text-white">
               <div className="text-center">
-                <p className="font-bold mb-2">خطا در بارگذاری ویدئو</p>
+                <p className="font-bold mb-2">{t('videoPlayer.loadError')}</p>
                 <p className="text-sm text-gray-300">{videoError}</p>
               </div>
             </div>
@@ -143,11 +145,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
               playsInline
               onError={(e) => {
                 const error = e.currentTarget.error;
-                const message = error?.message || 'خطای نامشخص در پخش ویدئو';
+                const message = error?.message || t('videoPlayer.unknownError');
                 setVideoError(message);
               }}
             >
-              مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
+              {t('videoPlayer.unsupported')}
             </video>
           )}
         </div>
@@ -155,7 +157,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onClose }) => {
         {/* Footer */}
         <div className="p-4 flex items-center gap-3 text-sm text-skin-muted">
           <Calendar size={14} className="shrink-0 text-skin-primary" />
-          <span>تاریخ انتشار: {video.date}</span>
+          <span>{t('videoPlayer.publishedDate', { date: video.date })}</span>
           {video.description && (
             <>
               <span className="text-skin-border">·</span>

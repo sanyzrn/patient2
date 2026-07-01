@@ -46,6 +46,7 @@ const ar = {
       alpha: 'أبجدي',
     },
     catalogCount: '{{count}} كتالوج',
+    byLanguageAria: 'تصفية {{lang}}',
     videoSearch: 'البحث في الفيديوهات...',
     grid: 'عرض شبكي',
     list: 'عرض قائمة',
@@ -234,6 +235,45 @@ const ar = {
   },
   videoCard: {
     playAria: 'تشغيل الفيديو {{title}}',
+  },
+  hero: {
+    regionAria: 'بانرات ترويجية',
+    readMore: 'مشاهدة المزيد',
+    catalogCount: '{{count}} كتالوج تعليمي',
+    bannerImageAlt: 'صورة البانر',
+    prevBanner: 'البانر السابق',
+    nextBanner: 'البانر التالي',
+    showBanner: 'عرض البانر {{n}}',
+  },
+  qrModal: {
+    scanHint: 'امسح للمشاركة مع المريض',
+  },
+  image: {
+    unavailable: 'الصورة غير متوفرة',
+  },
+  errorBoundary: {
+    title: 'حدثت مشكلة',
+    message: 'للأسف حدث خطأ غير متوقع. يمكنك إعادة المحاولة أو إعادة تحميل الصفحة.',
+    retry: 'إعادة المحاولة',
+    reload: 'إعادة تحميل الصفحة',
+  },
+  streak: {
+    milestone3: '🔥 ٣ أيام متتالية! أنت تكوّن عادة جديدة!',
+    milestone7: '🔥 ٧ أيام متتالية! أسبوع كامل!',
+    milestone14: '🔥 ١٤ يوماً متتالياً! أنت قدوة!',
+    milestone30: '🔥 شهر كامل متواصل! رائع!',
+    milestone60: '🔥 ٦٠ يوماً! قوة الأبطال الخارقين!',
+    milestone100: '🔥 ١٠٠ يوم! أسطوري!',
+  },
+  videoPlayer: {
+    playAria: 'تشغيل الفيديو: {{title}}',
+    speedAria: 'السرعة {{speed}}×',
+    pipEnter: 'صورة داخل صورة',
+    pipExit: 'الخروج من وضع الصورة داخل الصورة',
+    loadError: 'خطأ في تحميل الفيديو',
+    unknownError: 'خطأ غير معروف في تشغيل الفيديو',
+    unsupported: 'متصفحك لا يدعم تشغيل الفيديو.',
+    publishedDate: 'تاريخ النشر: {{date}}',
   },
   catalogCard: {
     downloadPdf: 'تحميل PDF',

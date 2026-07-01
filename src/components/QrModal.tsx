@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Catalog } from '../types';
 import QRCode from 'qrcode';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -10,6 +11,7 @@ interface QrModalProps {
 }
 
 const QrModal: React.FC<QrModalProps> = ({ catalog, onClose }) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const url = `${window.location.origin}${window.location.pathname}?cat=${catalog.id}`;
@@ -54,7 +56,7 @@ const QrModal: React.FC<QrModalProps> = ({ catalog, onClose }) => {
             <X size={16} />
           </button>
         </div>
-        <p className="text-xs text-skin-muted mb-4">برای اشتراک‌گذاری با بیمار اسکن کنید</p>
+        <p className="text-xs text-skin-muted mb-4">{t('qrModal.scanHint')}</p>
         <canvas
           ref={canvasRef}
           className="rounded-xl mx-auto bg-white p-4"
@@ -65,13 +67,13 @@ const QrModal: React.FC<QrModalProps> = ({ catalog, onClose }) => {
             onClick={handleDownload}
             className="flex-1 bg-skin-primary hover:bg-skin-primary-hover text-white py-2 rounded-xl text-sm font-bold transition-colors"
           >
-            دانلود
+            {t('viewer.download')}
           </button>
           <button
             onClick={onClose}
             className="flex-1 bg-skin-control-bg hover:bg-skin-control-hover text-skin-text py-2 rounded-xl text-sm font-bold transition-colors"
           >
-            بستن
+            {t('chatbot.close')}
           </button>
         </div>
       </div>

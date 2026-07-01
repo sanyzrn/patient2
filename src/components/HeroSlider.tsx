@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCatalogs } from '../context/CatalogContext';
 import SafeImage from './SafeImage';
 import { isSafeHttpUrl } from '../utils/helpers';
@@ -22,6 +23,7 @@ const MeshBackground: React.FC = () => (
 );
 
 const HeroSlider: React.FC = () => {
+  const { t } = useTranslation();
   const { banners, catalogs } = useCatalogs();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -84,7 +86,7 @@ const HeroSlider: React.FC = () => {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       role="region"
-      aria-label="بنرهای معرفی"
+      aria-label={t('hero.regionAria')}
     >
       {/* Gradient bg only for text banners */}
       {isTextBanner && (
@@ -131,14 +133,14 @@ const HeroSlider: React.FC = () => {
                         rel="noopener noreferrer"
                         className="inline-block mt-6 bg-skin-primary text-white px-6 py-2.5 rounded-xl font-bold hover:bg-skin-primary-hover transition-colors shadow-md"
                       >
-                        مشاهده بیشتر
+                        {t('hero.readMore')}
                       </a>
                     )}
                     {/* Catalog count badge */}
                     {catalogs.length > 0 && (
                       <div className="mt-4 inline-flex items-center gap-2 bg-skin-primary/10 text-skin-primary text-sm font-bold px-4 py-1.5 rounded-full border border-skin-primary/20">
                         <BookOpen size={14} />
-                        {catalogs.length} کاتالوگ آموزشی
+                        {t('hero.catalogCount', { count: catalogs.length })}
                       </div>
                     )}
                   </div>
@@ -160,7 +162,7 @@ const HeroSlider: React.FC = () => {
                         )}
                         <SafeImage
                           src={banner.imageUrl ?? ''}
-                          alt={banner.title ?? 'تصویر بنر'}
+                          alt={banner.title ?? t('hero.bannerImageAlt')}
                           className="w-full h-full object-cover"
                         />
                       </picture>
@@ -172,7 +174,7 @@ const HeroSlider: React.FC = () => {
                       )}
                       <SafeImage
                         src={banner.imageUrl ?? ''}
-                        alt={banner.title ?? 'تصویر بنر'}
+                        alt={banner.title ?? t('hero.bannerImageAlt')}
                         className="w-full h-full object-cover"
                       />
                     </picture>
@@ -190,7 +192,7 @@ const HeroSlider: React.FC = () => {
         <>
           <button
             onClick={() => goTo(currentIndex - 1)}
-            aria-label="بنر قبلی"
+            aria-label={t('hero.prevBanner')}
             className="hidden md:flex absolute right-4 z-20 p-2 bg-skin-card/70 hover:bg-skin-card text-skin-text rounded-full shadow-lg transition-all opacity-70 hover:opacity-100 border border-skin-border backdrop-blur-sm items-center justify-center"
             style={{ top: '50%', transform: 'translateY(-50%)' }}
           >
@@ -198,7 +200,7 @@ const HeroSlider: React.FC = () => {
           </button>
           <button
             onClick={() => goTo(currentIndex + 1)}
-            aria-label="بنر بعدی"
+            aria-label={t('hero.nextBanner')}
             className="hidden md:flex absolute left-4 z-20 p-2 bg-skin-card/70 hover:bg-skin-card text-skin-text rounded-full shadow-lg transition-all opacity-70 hover:opacity-100 border border-skin-border backdrop-blur-sm items-center justify-center"
             style={{ top: '50%', transform: 'translateY(-50%)' }}
           >
@@ -214,7 +216,7 @@ const HeroSlider: React.FC = () => {
             <button
               key={i}
               onClick={() => goTo(i)}
-              aria-label={`نمایش بنر ${i + 1}`}
+              aria-label={t('hero.showBanner', { n: i + 1 })}
               aria-current={i === currentIndex}
               className="flex-1 h-1 rounded-full overflow-hidden bg-white/30 hover:bg-white/50 transition-colors"
             >

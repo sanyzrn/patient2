@@ -46,6 +46,7 @@ const en = {
       alpha: 'Alphabetical',
     },
     catalogCount: '{{count}} catalogs',
+    byLanguageAria: 'Filter {{lang}}',
     videoSearch: 'Search videos...',
     grid: 'Grid view',
     list: 'List view',
@@ -234,6 +235,45 @@ const en = {
   },
   videoCard: {
     playAria: 'Play video {{title}}',
+  },
+  hero: {
+    regionAria: 'Promotional banners',
+    readMore: 'Read More',
+    catalogCount: '{{count}} educational catalogs',
+    bannerImageAlt: 'Banner image',
+    prevBanner: 'Previous banner',
+    nextBanner: 'Next banner',
+    showBanner: 'Show banner {{n}}',
+  },
+  qrModal: {
+    scanHint: 'Scan to share with a patient',
+  },
+  image: {
+    unavailable: 'Image unavailable',
+  },
+  errorBoundary: {
+    title: 'Something went wrong',
+    message: 'Unfortunately, an unexpected error occurred. You can try again or reload the page.',
+    retry: 'Try Again',
+    reload: 'Reload Page',
+  },
+  streak: {
+    milestone3: '🔥 3 days in a row! You\'re building a habit!',
+    milestone7: '🔥 7 days in a row! A full week!',
+    milestone14: '🔥 14 days in a row! You\'re a role model!',
+    milestone30: '🔥 1 month straight! Amazing!',
+    milestone60: '🔥 60 days! Superhero strength!',
+    milestone100: '🔥 100 days! Legendary!',
+  },
+  videoPlayer: {
+    playAria: 'Play video: {{title}}',
+    speedAria: 'Speed {{speed}}×',
+    pipEnter: 'Picture-in-Picture',
+    pipExit: 'Exit Picture-in-Picture',
+    loadError: 'Error loading video',
+    unknownError: 'Unknown video playback error',
+    unsupported: 'Your browser does not support video playback.',
+    publishedDate: 'Published: {{date}}',
   },
   catalogCard: {
     downloadPdf: 'Download PDF',
