@@ -15,6 +15,10 @@
   --font-sans: 'Vazirmatn', sans-serif;
 }
 
+html[lang="ru"] {
+  --font-sans: 'Noto Sans', 'Vazirmatn', sans-serif;
+}
+
 @layer base {
   :root {
     --color-bg-base: #f8fafc;
